@@ -1,0 +1,12 @@
+com.deathmetalmania
+com.deathmetalmania.apidoc
+com.deathmetalmania.controller
+com.deathmetalmania.dao
+com.deathmetalmania.exception
+com.deathmetalmania.model
+com.deathmetalmania.model.api.spotify
+com.deathmetalmania.model.api.ticketmaster
+com.deathmetalmania.model.dto
+com.deathmetalmania.security
+com.deathmetalmania.security.jwt
+com.deathmetalmania.service
