@@ -15,7 +15,7 @@ public class RestSpotifyService implements SpotifyService {
     private final String BASE_URL = "https://api.spotify.com/v1/";
     private final String spotifyAccessToken;
 
-    public RestSpotifyService(@Value ("${SPOTIFY_ACCESS_TOKEN}") String accessToken) {
+    public RestSpotifyService(@Value("${SPOTIFY_ACCESS_TOKEN}") String accessToken) {
         this.spotifyAccessToken = accessToken;
     }
 
