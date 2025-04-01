@@ -56,11 +56,12 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public BandDetails getBandById(String spotifyId) {
-        String url = BASE_URL + "artists/" + spotifyId + "?access_token=" + accessToken;
+        String url = BASE_URL + "artists/" + spotifyId;
 
         RestClient restClient = RestClient.create();
         BandDetails bandDetails = restClient.get()
                 .uri(url)
+                .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .body(BandDetails.class);
 
@@ -71,13 +72,15 @@ public class RestSpotifyService implements SpotifyService {
         return bandDetails;
     }
 
+
     @Override
     public AlbumResponse getAlbumsByBandId(String spotifyId) {
-        String url = BASE_URL + "artists/" + spotifyId + "/albums?access_token=" + accessToken;
+        String url = BASE_URL + "artists/" + spotifyId + "/albums";
 
         RestClient restClient = RestClient.create();
         AlbumResponse albumsDetails = restClient.get()
                 .uri(url)
+                .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .body(AlbumResponse.class);
 
