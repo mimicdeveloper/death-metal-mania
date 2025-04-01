@@ -27,7 +27,7 @@ public class ApiDocConfig {
 
     @Bean
     public OpenAPI MyApi() {
-        final String apiTitle = "REST API for Yon's Death Metal Mania";
+        final String apiTitle = "Death Metal Mania";
         final String securitySchemeName = "bearerAuth";
 
         // https://swagger.io/docs/specification/authentication/bearer-authentication/
