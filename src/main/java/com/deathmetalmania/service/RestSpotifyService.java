@@ -13,15 +13,14 @@ import org.springframework.web.client.RestClient;
 public class RestSpotifyService implements SpotifyService {
 
     private final String BASE_URL = "https://api.spotify.com/v1/";
-    private final String spotifyAccessToken;
-
-    public RestSpotifyService(@Value("${SPOTIFY_ACCESS_TOKEN}") String accessToken) {
-        this.spotifyAccessToken = accessToken;
+    private String accessToken;
+    public RestSpotifyService(@Value("${SPOTIFY_ACCESS_TOKEN}") String token) {
+        this.accessToken = token;
     }
 
     @Override
     public SpotifyApi searchByBandName(String bandName) {
-        String url = BASE_URL + "search?q=" + bandName + "&type=artist&access_token=" + spotifyAccessToken;
+        String url = BASE_URL + "search?q=" + bandName + "&type=artist&access_token=" + accessToken;
 
         RestClient restClient = RestClient.create();
         SpotifyApi fullResults = restClient.get()
@@ -43,7 +42,7 @@ public class RestSpotifyService implements SpotifyService {
         RestClient restClient = RestClient.create();
         SpotifyApi fullResults = restClient.get()
                 .uri(url)
-                .header("Authorization", "Bearer " + spotifyAccessToken)
+                .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .body(SpotifyApi.class);
 
@@ -57,7 +56,7 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public BandDetails getBandById(String spotifyId) {
-        String url = BASE_URL + "artists/" + spotifyId + "?access_token=" + spotifyAccessToken;
+        String url = BASE_URL + "artists/" + spotifyId + "?access_token=" + accessToken;
 
         RestClient restClient = RestClient.create();
         BandDetails bandDetails = restClient.get()
@@ -74,7 +73,7 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public AlbumResponse getAlbumsByBandId(String spotifyId) {
-        String url = BASE_URL + "artists/" + spotifyId + "/albums?access_token=" + spotifyAccessToken;
+        String url = BASE_URL + "artists/" + spotifyId + "/albums?access_token=" + accessToken;
 
         RestClient restClient = RestClient.create();
         AlbumResponse albumsDetails = restClient.get()
