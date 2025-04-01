@@ -10,7 +10,6 @@ import com.deathmetalmania.model.dto.EventDto;
 import com.deathmetalmania.model.Concert;
 import com.deathmetalmania.service.*;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;

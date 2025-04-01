@@ -1,14 +1,11 @@
 package com.deathmetalmania.controller;
 
-import com.deathmetalmania.dao.BandDao;
 import com.deathmetalmania.exception.DaoException;
 import com.deathmetalmania.model.Band;
 import com.deathmetalmania.model.api.spotify.AlbumResponse;
 import com.deathmetalmania.model.api.spotify.BandDetails;
 import com.deathmetalmania.model.api.spotify.SpotifyApi;
 import com.deathmetalmania.service.BandService;
-import com.deathmetalmania.service.RestBandService;
-import com.deathmetalmania.service.RestSpotifyService;
 import com.deathmetalmania.service.SpotifyService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

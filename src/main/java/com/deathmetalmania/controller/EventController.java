@@ -1,12 +1,9 @@
 package com.deathmetalmania.controller;
 
-import com.deathmetalmania.dao.EventDao;
 import com.deathmetalmania.model.Concert;
 import com.deathmetalmania.model.api.ticketmaster.TicketmasterApi;
 import com.deathmetalmania.service.EventService;
-import com.deathmetalmania.service.RestTicketmasterService;
-import com.deathmetalmania.service.RestEventService;  // Ensure this import is added
-import com.deathmetalmania.exception.DaoException; // Import DaoException
+import com.deathmetalmania.exception.DaoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
