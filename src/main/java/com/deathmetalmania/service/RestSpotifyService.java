@@ -38,7 +38,7 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public SpotifyApi searchDeathMetalBands() {
-        String url = BASE_URL + "search?q=genre%3Adeathmetal&type=artist&limit=50";
+        String url = BASE_URL + "search?q=genre%253deathmetal&type=artist&limit=50";
 
         RestClient restClient = RestClient.create();
         SpotifyApi fullResults = restClient.get()
