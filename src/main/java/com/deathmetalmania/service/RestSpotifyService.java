@@ -43,7 +43,7 @@ public class RestSpotifyService implements SpotifyService {
         RestClient restClient = RestClient.create();
         SpotifyApi fullResults = restClient.get()
                 .uri(url)
-                .header("Authorization", "Bearer " + spotifyAccessToken)  // Use the token in the header
+                .header("Authorization", "Bearer 1POdFZRZbvb...qqillRxMr2z" + spotifyAccessToken)
                 .retrieve()
                 .body(SpotifyApi.class);
 
