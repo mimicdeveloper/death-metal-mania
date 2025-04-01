@@ -40,7 +40,7 @@ public class ApiDocConfig {
         return new OpenAPI()
                 .servers(List.of(new Server().url("/")))
                 .info(new Info().title(apiTitle)
-                        .description("REST API for the best Death Metal band and event tracker online")
+                        .description("The best Death Metal band and event tracker online")
                         .version("v0.0.1")
                         .license(new License().name("Apache 2.0").url("http://springdoc.org")))
                 .components( new Components().addSecuritySchemes(securitySchemeName, securityScheme))
