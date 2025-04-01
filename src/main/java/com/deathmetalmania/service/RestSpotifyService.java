@@ -38,12 +38,11 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public SpotifyApi searchDeathMetalBands() {
-        String url = BASE_URL + "search?q=genre%3Adeathmetal&type=artist&limit=50";
+        String url = BASE_URL + "search?q=genre%3Adeathmetal&type=artist&limit=50&access_token=" + spotifyAccessToken;
 
         RestClient restClient = RestClient.create();
         SpotifyApi fullResults = restClient.get()
                 .uri(url)
-                .header("Authorization", "Bearer " + spotifyAccessToken) // Add token in the Authorization header
                 .retrieve()
                 .body(SpotifyApi.class);
 
