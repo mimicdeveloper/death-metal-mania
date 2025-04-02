@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.deathmetalmania</groupId>
-    <artifactId>death-metal-mania</artifactId>
+    <artifactId>Death-Metal-Mania</artifactId>
     <version>1.0</version>
 
     <properties>
