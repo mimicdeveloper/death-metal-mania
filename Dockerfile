@@ -3,6 +3,6 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 FROM openjdk:17.0.1-jdk-slim
-COPY --from=build /target/death-metal-mania-1.0.jar mod2-final.jar
+COPY --from=build /target/Death-Metal-Mania-1.0.jar mod2-final.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "mod2-final.jar"]
