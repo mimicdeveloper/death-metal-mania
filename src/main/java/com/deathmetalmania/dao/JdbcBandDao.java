@@ -36,10 +36,14 @@ public class JdbcBandDao implements BandDao {
 
     @Override
     public void add(Band band) {
-        String sql = "INSERT INTO bands (band_id, name, genre, country) " +
-                     "VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO bands (spotify_id, name, genre, country) VALUES (?, ?, ?, ?)";
         try {
-            jdbcTemplate.update(sql, band.getBand_id(), band.getName(), band.getGenre(), band.getCountry());
+            jdbcTemplate.update(sql,
+                    band.getSpotify_id(),
+                    band.getName(),
+                    band.getGenre(),
+                    band.getCountry()
+            );
         } catch (Exception e) {
             throw new DaoException("Error adding band to the database.", e);
         }

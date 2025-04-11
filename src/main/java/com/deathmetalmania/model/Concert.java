@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class Concert {
-    private int event_id;
-    private int band_id;
+    private Long eventId;  // Changed to camelCase
+    private int bandId;    // Changed to camelCase
     private String name;
     private LocalDate date;
     private String venue;
@@ -16,20 +16,16 @@ public class Concert {
     private String info;
 
     // Getters and setters
-    public int getEvent_id() {
-        return event_id;
-    }
-
-    public void setEvent_id(int event_id) {
-        this.event_id = event_id;
+    public Long getEventId() {
+        return eventId;
     }
 
     public int getBandId() {
-        return band_id;
+        return bandId;
     }
 
     public void setBandId(int bandId) {
-        this.band_id = bandId;
+        this.bandId = bandId;
     }
 
     public String getName() {
@@ -94,5 +90,10 @@ public class Concert {
 
     public void setInfo(String info) {
         this.info = info;
+    }
+
+    // Implement the setter for eventId
+    public void setEventId(Long eventId) {
+        this.eventId = eventId;
     }
 }

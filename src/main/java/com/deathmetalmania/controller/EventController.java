@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/events")
 public class EventController {
 
@@ -56,16 +57,12 @@ public class EventController {
     // Search events by band name
     // ==========================
     @RequestMapping(path = "/search", method = RequestMethod.GET)
-    public TicketmasterApi searchEvents(@RequestParam String band_name) {
+    public TicketmasterApi searchEventsByBand(@RequestParam(name = "band_name") String bandName) {
         try {
-            return eventService.searchEventsByBand(band_name);
-
+            return eventService.searchEventsByBand(bandName);
         } catch (IllegalArgumentException e) {
-
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid band name or request parameters", e);
-
         } catch (DaoException e) {
-
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to search events from the database or external service", e);
         }
     }

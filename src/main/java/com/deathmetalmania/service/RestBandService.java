@@ -39,13 +39,19 @@ public class RestBandService implements BandService {
             if (bandDto.getCountry() == null || bandDto.getCountry().trim().isEmpty()) {
                 throw new InvalidDataException("Band country cannot be empty");
             }
+            if (bandDto.getGenre() == null || bandDto.getGenre().trim().isEmpty()) {
+                throw new InvalidDataException("Band genre cannot be empty");
+            }
+            if (bandDto.getSpotify_id() == null || bandDto.getSpotify_id().trim().isEmpty()) {
+                throw new InvalidDataException("Spotify ID cannot be empty");
+            }
 
-            // Map BandDto to Band
+            // Map BandDto to Band entity
             Band band = new Band();
-            band.setBand_id(bandDto.getBand_id());
             band.setName(bandDto.getName());
-            band.setGenre("Death Metal");
+            band.setGenre(bandDto.getGenre());
             band.setCountry(bandDto.getCountry());
+            band.setSpotify_id(bandDto.getSpotify_id());
 
             bandDao.add(band);
         } catch (InvalidDataException e) {
@@ -54,6 +60,8 @@ public class RestBandService implements BandService {
             throw new ServiceException("Error adding the band", e);
         }
     }
+
+
 
     @Override
     public void updateBand(int id, BandDto bandDto) {

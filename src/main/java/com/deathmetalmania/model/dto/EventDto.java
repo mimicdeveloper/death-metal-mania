@@ -1,22 +1,24 @@
 package com.deathmetalmania.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class EventDto {
 
-    private Integer event_id;
-
     @NotNull(message = "Band ID cannot be null")
-    private Integer band_id;
+    @JsonProperty("band_id")
+    private Integer bandId;
 
     @NotBlank(message = "Event name cannot be blank")
     @Size(min = 1, max = 100, message = "Event name must be between 1 and 100 characters")
     private String name;
 
     @NotNull(message = "Event date cannot be null")
+    @DateTimeFormat(pattern = "MM-dd-yyyy")
     private LocalDate date;
 
     @NotBlank(message = "Venue cannot be blank")
@@ -42,21 +44,14 @@ public class EventDto {
     @Size(max = 500, message = "Information must be less than 500 characters")
     private String info;
 
-    // Getters and Setters for all fields, including event_id and band_id
-    public Integer getEvent_id() {
-        return event_id;
+    // Getters and Setters for all fields, without event_id
+
+    public Integer getBandId() {
+        return bandId;
     }
 
-    public void setEvent_id(Integer event_id) {
-        this.event_id = event_id;
-    }
-
-    public Integer getBand_id() {
-        return band_id;
-    }
-
-    public void setBand_id(Integer band_id) {
-        this.band_id = band_id;
+    public void setBandId(Integer bandId) {
+        this.bandId = bandId;
     }
 
     public String getName() {

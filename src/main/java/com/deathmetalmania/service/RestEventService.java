@@ -9,12 +9,12 @@ import com.deathmetalmania.model.api.ticketmaster.TicketmasterApi;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 @Service
 public class RestEventService implements EventService {
 
     private final EventDao eventDao;
     private final RestTicketmasterService restTicketmasterService;
-
 
     public RestEventService(EventDao eventDao, RestTicketmasterService restTicketmasterService) {
         this.eventDao = eventDao;
@@ -42,7 +42,6 @@ public class RestEventService implements EventService {
     @Override
     public Concert createEvent(EventDto eventDto) {
         try {
-            // Validate input data
             if (eventDto.getName() == null || eventDto.getName().trim().isEmpty()) {
                 throw new InvalidDataException("Event name cannot be empty");
             }
@@ -50,10 +49,8 @@ public class RestEventService implements EventService {
                 throw new InvalidDataException("Event date cannot be null");
             }
 
-
             Concert concert = new Concert();
-            concert.setEvent_id(eventDto.getEvent_id());
-            concert.setBandId(eventDto.getBand_id());
+            concert.setBandId(eventDto.getBandId()); // fixed
             concert.setName(eventDto.getName());
             concert.setDate(eventDto.getDate());
             concert.setVenue(eventDto.getVenue());
@@ -74,10 +71,9 @@ public class RestEventService implements EventService {
     @Override
     public void updateEvent(int id, EventDto eventDto) {
         try {
-            // Convert EventDto to Concert
             Concert concert = new Concert();
-            concert.setEvent_id(id);
-            concert.setBandId(eventDto.getBand_id());
+            concert.setEventId((long) id);
+            concert.setBandId(eventDto.getBandId()); // fixed
             concert.setName(eventDto.getName());
             concert.setDate(eventDto.getDate());
             concert.setVenue(eventDto.getVenue());
@@ -93,6 +89,7 @@ public class RestEventService implements EventService {
         }
     }
 
+
     @Override
     public void deleteEvent(int id) {
         try {
@@ -101,7 +98,6 @@ public class RestEventService implements EventService {
             throw new ServiceException("Error deleting event with ID: " + id, e);
         }
     }
-
 
     @Override
     public TicketmasterApi searchEventsByBand(String bandName) {

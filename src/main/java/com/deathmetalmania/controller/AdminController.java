@@ -18,8 +18,9 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/admin")
-@PreAuthorize("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final UserDao userDao;
@@ -41,7 +42,7 @@ public class AdminController {
 
     // Get all user profiles
     @RequestMapping(path = "/users", method = RequestMethod.GET)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<UserProfile> getAllUserProfiles() {
         List<UserProfile> users = userDao.getAllUserProfiles();
         if (users.isEmpty()) {
@@ -52,7 +53,7 @@ public class AdminController {
 
     // Get a user profile by ID
     @RequestMapping(path = "/users/{id}", method = RequestMethod.GET)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserProfile getUserProfileById(@PathVariable int id) {
         UserProfile userProfile = userDao.getUserProfileById(id);
         if (userProfile != null) {
@@ -64,7 +65,7 @@ public class AdminController {
 
     // Update a user profile
     @RequestMapping(path = "/users/{id}", method = RequestMethod.PUT)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserProfile updateUserProfile(@PathVariable int id, @RequestBody UserProfileDto profile) {
         UserProfile existingProfile = userDao.getUserProfileById(id);
 
@@ -81,7 +82,7 @@ public class AdminController {
 
     // Delete a user account
     @RequestMapping(path = "/users/{id}", method = RequestMethod.DELETE)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUserAccount(@PathVariable int id) {
         UserProfile existingProfile = userDao.getUserProfileById(id);
@@ -97,7 +98,7 @@ public class AdminController {
 
     // Add a new band
     @RequestMapping(path = "/bands", method = RequestMethod.POST)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public void addBand(@RequestBody BandDto bandDto) {
         try {
@@ -109,7 +110,7 @@ public class AdminController {
 
     // Update a band
     @RequestMapping(path = "/bands/{id}", method = RequestMethod.PUT)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void updateBand(@PathVariable int id, @RequestBody BandDto bandDto) {
         try {
             bandService.updateBand(id, bandDto);
@@ -122,7 +123,7 @@ public class AdminController {
 
     // Delete a band
     @RequestMapping(path = "/bands/{id}", method = RequestMethod.DELETE)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBand(@PathVariable int id) {
         try {
@@ -152,7 +153,7 @@ public class AdminController {
 
     // Update an event
     @RequestMapping(path = "/events/{id}", method = RequestMethod.PUT)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void updateEvent(@PathVariable int id, @RequestBody @Valid EventDto eventDto) {
         try {
             eventService.updateEvent(id, eventDto);
@@ -165,7 +166,7 @@ public class AdminController {
 
     // Delete an event
     @RequestMapping(path = "/events/{id}", method = RequestMethod.DELETE)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteEvent(@PathVariable int id) {
         try {

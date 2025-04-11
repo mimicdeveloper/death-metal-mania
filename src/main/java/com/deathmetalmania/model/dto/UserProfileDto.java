@@ -9,30 +9,30 @@ import jakarta.validation.constraints.Email;
  */
 public class UserProfileDto {
 
-    @JsonProperty("first_name")
+    @JsonProperty("firstName")
     @NotBlank(message = "First name cannot be blank")
-    private String firstname;
+    private String firstName;
 
-    @JsonProperty("last_name")
+    @JsonProperty("lastName")
     @NotBlank(message = "Last name cannot be blank")
-    private String lastname;
+    private String lastName;
 
     @Email(message = "Email should be valid")
     @NotBlank(message = "Email cannot be blank")
     private String email;
 
     public UserProfileDto(String first_name, String last_name, String email) {
-        this.firstname = first_name;
-        this.lastname = last_name;
+        this.firstName = first_name;
+        this.lastName = last_name;
         this.email = email;
     }
 
     public String getFirstname() {
-        return firstname;
+        return firstName;
     }
 
     public String getLastname() {
-        return lastname;
+        return lastName;
     }
 
     public String getEmail() {

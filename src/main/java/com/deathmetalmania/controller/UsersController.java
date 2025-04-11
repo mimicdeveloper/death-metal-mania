@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.security.Principal;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/user")
 public class UsersController {
 

@@ -20,7 +20,7 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public SpotifyApi searchByBandName(String bandName) {
-        String url = BASE_URL + "search?q=" + bandName + "&type=artist&access_token=" + accessToken;
+        String url = BASE_URL + "search?q=" + bandName + "&type=artist&limit=1&access_token=" + accessToken;
 
         RestClient restClient = RestClient.create();
         SpotifyApi fullResults = restClient.get()

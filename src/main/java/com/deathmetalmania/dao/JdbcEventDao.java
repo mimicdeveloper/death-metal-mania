@@ -1,7 +1,7 @@
 package com.deathmetalmania.dao;
 
 import com.deathmetalmania.model.Concert;
-import com.deathmetalmania.exception.DaoException; // Import DaoException
+import com.deathmetalmania.exception.DaoException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -50,17 +50,32 @@ public class JdbcEventDao implements EventDao {
 
     @Override
     public Concert createEvent(Concert concert) {
-        String sql = "INSERT INTO Events (event_id, band_id, name, dates, venue, city, country_code, min_price, max_price) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        // Update the SQL to include the 'info' column
+        String sql = "INSERT INTO Events (band_id, name, dates, venue, city, country_code, min_price, max_price, info) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING event_id";  // Added info field to SQL
+
         try {
-            jdbcTemplate.update(sql, concert.getEvent_id(), concert.getBandId(), concert.getName(), concert.getDate(),
-                    concert.getVenue(), concert.getCity(), concert.getCountryCode(),
-                    concert.getMinPrice(), concert.getMaxPrice());
+            // Retrieve the event_id after insertion, including the 'info' field
+            Long eventId = jdbcTemplate.queryForObject(sql, Long.class,
+                    concert.getBandId(),
+                    concert.getName(),
+                    java.sql.Date.valueOf(concert.getDate()),  // convert LocalDate to SQL Date
+                    concert.getVenue(),
+                    concert.getCity(),
+                    concert.getCountryCode(),
+                    concert.getMinPrice(),
+                    concert.getMaxPrice(),
+                    concert.getInfo());  // Include info field
+
+            // Optionally, set the eventId in the Concert object (if you need to)
+            concert.setEventId(eventId);  // Make sure Concert has setEventId and eventId fields
+
         } catch (Exception e) {
             throw new DaoException("Error creating event in the database.", e);
         }
         return concert;
     }
+
 
     @Override
     public void updateEvent(int id, Concert concert) {
@@ -94,6 +109,7 @@ public class JdbcEventDao implements EventDao {
         concert.setCountryCode(rs.getString("country_code"));
         concert.setMinPrice(rs.getBigDecimal("min_price"));
         concert.setMaxPrice(rs.getBigDecimal("max_price"));
+        concert.setEventId(rs.getLong("event_id"));  // Updated to camelCase
         return concert;
     }
 }
