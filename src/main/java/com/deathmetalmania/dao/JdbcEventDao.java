@@ -51,7 +51,7 @@ public class JdbcEventDao implements EventDao {
     @Override
     public Concert createEvent(Concert concert) {
         // Update the SQL to include the 'info' column
-        String sql = "INSERT INTO Events (band_id, name, dates, venue, city, country_code, min_price, max_price, info) " +
+        String sql = "INSERT INTO events (band_id, name, dates, venue, city, country_code, min_price, max_price, info) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING event_id";  // Added info field to SQL
 
         try {
