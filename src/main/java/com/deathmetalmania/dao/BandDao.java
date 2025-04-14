@@ -14,10 +14,10 @@ public interface BandDao {
 
     /**
      *
-     * @param band
+     * @param bandDto
      * Adds a new band
      */
-    void add(Band band);
+    void add(BandDto bandDto);
 
     /**
      * Update a band's details

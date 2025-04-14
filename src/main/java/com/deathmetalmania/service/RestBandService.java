@@ -53,7 +53,7 @@ public class RestBandService implements BandService {
             band.setCountry(bandDto.getCountry());
             band.setSpotify_id(bandDto.getSpotify_id());
 
-            bandDao.add(band);
+            bandDao.add(bandDto);
         } catch (InvalidDataException e) {
             throw e;
         } catch (Exception e) {
