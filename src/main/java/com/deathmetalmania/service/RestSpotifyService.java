@@ -37,16 +37,23 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public SpotifyApi searchDeathMetalBands() {
-        String url = BASE_URL + "search?q=genre%253deathmetal&type=artist&limit=50";
 
-        RestClient restClient = RestClient.create();
+        String url = "https://api.spotify.com/v1/search";
+
+        RestClient restClient = RestClient.builder().baseUrl(url).build();
+
         SpotifyApi fullResults = restClient.get()
-                .uri(url)
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("q", "genre:\"death metal\"")
+                        .queryParam("type", "artist")
+                        .queryParam("limit", "50")
+                        .build()
+                )
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .body(SpotifyApi.class);
 
-        if (fullResults == null || fullResults.getArtists() == null) {
+        if (fullResults == null || fullResults.getArtists() == null || fullResults.getArtists().getItems().isEmpty()) {
             throw new ServiceException("No death metal bands found");
         }
 

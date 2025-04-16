@@ -18,7 +18,7 @@ public class RestTicketmasterService implements TicketmasterService {
     }
 
     public TicketmasterApi searchEventsByBand(String bandName) {
-        // Construct URL for the Ticketmaster API request
+
         String url = BASE_URL + "?keyword=" + bandName + "&apikey=" + ticketmasterApiKey;
 
         try {

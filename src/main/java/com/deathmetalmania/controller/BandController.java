@@ -60,6 +60,7 @@ public class BandController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error fetching death metal bands", e);
         }
+
     }
 
     //Search by band name
