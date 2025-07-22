@@ -27,5 +27,3 @@ coverage
 *.sln
 *.sw?
 
-# In frontend/.gitignore
-index.html
