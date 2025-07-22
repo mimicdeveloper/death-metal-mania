@@ -1,64 +1,53 @@
-# 🎸 Death Metal Mania
+🎸 Death Metal Mania
+Death Metal Mania is a full-stack web application for discovering death metal bands, viewing events, saving favorites, and managing content with user and admin roles.
 
-**Death Metal Mania** is a full-stack web application for discovering death metal bands, viewing events, saving favorites, and managing content with user and admin roles.
+🚀 Quick Start
+The backend uses a PostgreSQL database hosted on Koyeb, and the frontend is a separate client app. The Spotify API token and credentials needed to query Spotify data are already configured and managed by the backend, including automatic token refreshing.
 
----
+📋 Prerequisites
+Java 17+ and Maven (for backend development)
 
-## 🚀 Quick Start
+Node.js and npm (for frontend development)
 
-The backend uses a PostgreSQL database hosted on [Koyeb](https://www.koyeb.com/), and the frontend is a separate client app. The Spotify API token and credentials needed to query Spotify data are **already configured** and managed by the backend, including automatic token refreshing.
+PostgreSQL client (pgAdmin, DBeaver, or psql) for initial DB setup
 
----
+Access to the Koyeb PostgreSQL instance (connection details will be provided)
 
-## 📋 Prerequisites
+🔧 Backend Setup
+1. Connect to Koyeb PostgreSQL Database
+Obtain your Koyeb PostgreSQL connection details (host, port, database name, username, password).
 
-- Java 17+ and Maven (for backend development)  
-- Node.js and npm (for frontend development)  
-- PostgreSQL client (pgAdmin, DBeaver, or psql) for initial DB setup  
-- Access to the Koyeb PostgreSQL instance (connection details will be provided)
+Use pgAdmin, DBeaver, or any SQL client to connect to your Koyeb database.
 
----
+2. Initialize Database Schema
+Open the SQL file located at: server/database/m2_final_project.sql
 
-## 🔧 Backend Setup
+Run the entire SQL script against your Koyeb PostgreSQL database.
 
-### 1. Connect to Koyeb PostgreSQL Database
+Important: This step creates all necessary tables, constraints, and initial data.
+The backend does not automatically create or migrate the database schema.
 
-- Obtain your Koyeb PostgreSQL connection details (host, port, database name, username, password).  
-- Use pgAdmin, DBeaver, or any SQL client to connect to your Koyeb database.
+3. Configure and Run Backend
+Open the backend project located at final-project/server/death-metal-mania-backend-final-project - Gold/ in IntelliJ.
 
-### 2. Initialize Database Schema
+Ensure application.properties is configured to point to the Koyeb PostgreSQL database.
 
-- Open the SQL file located at: `server/database/m2_final_project.sql`  
-- Run the entire SQL script against your Koyeb PostgreSQL database.
+Run the Spring Boot application main class.
 
-> **Important:** This step creates all necessary tables, constraints, and initial data.  
-> The backend **does not automatically create or migrate** the database schema.
+Keep the backend running while using the frontend.
 
-### 3. Configure and Run Backend
+🌐 Frontend Setup
+1. Open Frontend Project
+Navigate to final-project/client/
 
-- Open the backend project located at `final-project/server/death-metal-mania-backend-final-project - Gold/` in IntelliJ.  
-- Ensure `application.properties` is configured to point to the Koyeb PostgreSQL database.  
-- Run the Spring Boot application main class.  
-- Keep the backend running while using the frontend.
+Open the folder in VS Code or your preferred editor.
 
----
-
-## 🌐 Frontend Setup
-
-### 1. Open Frontend Project
-
-- Navigate to `final-project/client/`  
-- Open the folder in VS Code or your preferred editor.
-
-### 2. Install Dependencies
-
-```bash
+2. Install Dependencies
 npm install
+
 3. Run Development Server
-bash
-Copy
-Edit
 npm run dev
+
 Open your browser to the URL shown in the terminal (usually http://localhost:5173).
 
 👤 User Access
