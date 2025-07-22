@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Module Three final project
 
 There are 2 options for the Module-3 final project:
@@ -362,3 +363,6 @@ A "favicon" is the small icon that you see on the browser tab when you navigate 
   <link rel="icon" href="/my-custom-favicon.ico"> <!-- you don't need to include `public`, Vue automatically copies files from `public` to the root of the web server -->
 </head>
 ```
+=======
+# Yon's Death Metal Mania
+>>>>>>> bb87f9211d31ff7f030ea9938fd838d0065f3edc

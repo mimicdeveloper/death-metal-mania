@@ -42,6 +42,12 @@ node_modules
 .settings
 target/
 
+<<<<<<< HEAD
+=======
+*.sql
+.env
+
+>>>>>>> bb87f9211d31ff7f030ea9938fd838d0065f3edc
 ### IntelliJ IDEA ###
 .idea
 *.iws
