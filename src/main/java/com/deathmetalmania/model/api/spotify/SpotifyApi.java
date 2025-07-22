@@ -41,6 +41,9 @@ public class SpotifyApi {
         @JsonProperty("popularity")
         private int popularity;
 
+        @JsonProperty("genres") // <-- This tells Jackson to map the "genres" field from JSON
+        private List<String> genres;
+
         public String getId() {
             return id;
         }
@@ -64,5 +67,14 @@ public class SpotifyApi {
         public void setPopularity(int popularity) {
             this.popularity = popularity;
         }
+
+        public List<String> getGenres() {
+            return genres;
+        }
+
+        public void setGenres(List<String> genres) {
+            this.genres = genres;
+        }
     }
+
 }

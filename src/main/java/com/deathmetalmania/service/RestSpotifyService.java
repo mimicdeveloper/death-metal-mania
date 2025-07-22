@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Service
 public class RestSpotifyService implements SpotifyService {
@@ -20,7 +23,7 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public SpotifyApi searchByBandName(String bandName) {
-        String url = BASE_URL + "search?q=" + bandName + "&type=artist&limit=1&access_token=" + accessToken;
+        String url = BASE_URL + "search?q=" + bandName + "&type=artist&limit=3&access_token=" + accessToken;
 
         RestClient restClient = RestClient.create();
         SpotifyApi fullResults = restClient.get()
@@ -37,28 +40,78 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public SpotifyApi searchDeathMetalBands() {
-
         String url = "https://api.spotify.com/v1/search";
-
         RestClient restClient = RestClient.builder().baseUrl(url).build();
 
-        SpotifyApi fullResults = restClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .queryParam("q", "genre:\"death metal\"")
-                        .queryParam("type", "artist")
-                        .queryParam("limit", "50")
-                        .build()
-                )
-                .header("Authorization", "Bearer " + accessToken)
-                .retrieve()
-                .body(SpotifyApi.class);
+        List<SpotifyApi.Artist> allValidArtists = new ArrayList<>();
 
-        if (fullResults == null || fullResults.getArtists() == null || fullResults.getArtists().getItems().isEmpty()) {
-            throw new ServiceException("No death metal bands found");
+        int limit = 50;
+        int totalFetched = 0;
+        int maxPages = 8; // Adjust this as needed to control how many pages you want
+
+        for (int page = 0; page < maxPages; page++) {
+            int offset = page * limit;
+
+            SpotifyApi partialResults = restClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .queryParam("q", "genre:\"death metal\"")
+                            .queryParam("type", "artist")
+                            .queryParam("limit", String.valueOf(limit))
+                            .queryParam("offset", String.valueOf(offset))
+                            .build()
+                    )
+                    .header("Authorization", "Bearer " + accessToken)
+                    .retrieve()
+                    .body(SpotifyApi.class);
+
+            if (partialResults == null || partialResults.getArtists() == null || partialResults.getArtists().getItems() == null) {
+                break; // Stop if no more results
+            }
+
+            for (SpotifyApi.Artist artist : partialResults.getArtists().getItems()) {
+                if (artist.getGenres() != null) {
+                    String genresLower = artist.getGenres().toString().toLowerCase();
+                    String artistName = artist.getName().toLowerCase();
+                    String artistId = artist.getId();
+
+                    if (!genresLower.contains("deathcore") &&
+                            !genresLower.contains("thrash metal") &&
+                            !genresLower.contains("black metal") &&
+                            !genresLower.contains("melodic death metal") &&
+                            !genresLower.contains("emo") &&
+                            !artistName.equals("i see stars") &&
+                            !artistId.equals("3iCJOi5YKh247eutgCyLFe")) {
+                        allValidArtists.add(artist);
+                    }
+                }
+            }
+
+
+
+
+
+
+            totalFetched += partialResults.getArtists().getItems().size();
+
+            // Optional: Break early if fewer than 50 returned (no more pages)
+            if (partialResults.getArtists().getItems().size() < limit) {
+                break;
+            }
         }
 
-        return fullResults;
+        if (allValidArtists.isEmpty()) {
+            throw new ServiceException("No valid death metal bands found (deathcore filtered out)");
+        }
+
+        // Wrap results in a SpotifyApi response
+        SpotifyApi.ArtistResponse response = new SpotifyApi.ArtistResponse();
+        response.setItems(allValidArtists);
+        SpotifyApi finalResult = new SpotifyApi();
+        finalResult.setArtists(response);
+
+        return finalResult;
     }
+
 
 
     @Override

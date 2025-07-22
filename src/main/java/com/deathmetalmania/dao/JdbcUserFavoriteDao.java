@@ -35,7 +35,7 @@ public class JdbcUserFavoriteDao implements UserFavoriteDao {
 
     @Override
     public List<Favorite> getFavoritesByUserId(int userId) {
-        String sql = "SELECT uf.user_id, uf.band_id, uf.band_name, uf.rating " +
+        String sql = "SELECT uf.user_id, uf.band_id, uf.rating, uf.band_name " +
                      "FROM User_favorites uf " +
                      "WHERE uf.user_id = ?";
 
