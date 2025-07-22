@@ -1,5 +1,6 @@
 package com.deathmetalmania.service;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -32,7 +33,12 @@ public class SpotifyTokenService {
         return accessToken;
     }
 
-    @Scheduled(fixedDelay = 2700000) // Refresh every ~45 minutes
+    @PostConstruct
+    public void init() {
+        refreshAccessToken(); // <--- Force refresh once on startup
+    }
+
+    @Scheduled(fixedDelay = 2700000)
     public void refreshAccessToken() {
         String basicAuth = Base64.getEncoder().encodeToString(
                 (clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8)
