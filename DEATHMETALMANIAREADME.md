@@ -1,6 +1,6 @@
 # 🎸 Death Metal Mania
 
-Welcome to **Death Metal Mania**, a full-stack web application for discovering death metal bands, viewing events, saving favorites, and managing content as a user or admin.
+Welcome to **Death Metal Mania**, a full-stack web application for discovering death metal bands, viewing events, saving favorite bands and events, and managing content as a user or admin.
 
 ## 🔧 Setup Instructions
 
