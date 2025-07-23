@@ -1,28 +1,34 @@
-import './assets/main.css'
+import './assets/main.css';
 
-import { createApp } from 'vue'
-import MyApp from './App.vue'
-import { createStore } from './store'
-import router from './router'
-import axios from 'axios'
+import { createApp } from 'vue';
+import MyApp from './App.vue';
+import { createStore } from './store';
+import router from './router';
+import api from './api'; // ✅ Import your configured Axios instance
 
-/* import fontawesome core */
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faCartPlus, faTrashCan, faXmark, faMagnifyingGlass, faRotate, faTable, faGrip }
-  from '@fortawesome/free-solid-svg-icons'
+/* FontAwesome core */
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import {
+  faCartPlus,
+  faTrashCan,
+  faXmark,
+  faMagnifyingGlass,
+  faRotate,
+  faTable,
+  faGrip
+} from '@fortawesome/free-solid-svg-icons';
 
-/* add icons to the library */
-library.add(faCartPlus);
-library.add(faTrashCan);
-library.add(faXmark);
-library.add(faMagnifyingGlass);
-library.add(faRotate);
-library.add(faTable);
-library.add(faGrip);
-
-/* sets the base url for server API communication with axios */
-axios.defaults.baseURL = import.meta.env.VITE_REMOTE_API;
+/* Add icons to the library */
+library.add(
+  faCartPlus,
+  faTrashCan,
+  faXmark,
+  faMagnifyingGlass,
+  faRotate,
+  faTable,
+  faGrip
+);
 
 /**
  * Check if a JWT token is expired.
@@ -48,18 +54,19 @@ if (storedToken && isTokenExpired(storedToken)) {
   localStorage.removeItem('user');
 }
 
-// Grab token and user from localStorage (might be null if expired and removed)
+// Grab token and user from localStorage (may be null if removed)
 let currentToken = localStorage.getItem('token');
 let currentUser = JSON.parse(localStorage.getItem('user'));
 
 if (currentToken) {
-  // Set token on axios headers so all requests include it
-  axios.defaults.headers.common['Authorization'] = `Bearer ${currentToken}`;
+  // ✅ Use your custom Axios instance to set the Authorization header
+  api.defaults.headers.common['Authorization'] = `Bearer ${currentToken}`;
 }
 
-// Create the Vuex store passing in the stored credentials
+// Create Vuex store with stored credentials
 const store = createStore(currentToken, currentUser);
 
+// Create and mount Vue app
 const app = createApp(MyApp);
 app.use(store);
 app.use(router);

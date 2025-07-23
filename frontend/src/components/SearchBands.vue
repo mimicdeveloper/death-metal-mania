@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api'; // <-- Use your configured Axios instance
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 
 export default {
@@ -82,8 +82,7 @@ export default {
     async searchByGenre() {
       this.isLoading = true;
       try {
-        // Use relative path now
-        const response = await axios.get('/bands/searchByDeathMetalGenre');
+        const response = await api.get('/bands/searchByDeathMetalGenre');
         this.results = response.data.artists?.items || [];
       } catch (error) {
         console.error('Error fetching death metal bands:', error);
@@ -99,8 +98,7 @@ export default {
 
       this.isLoading = true;
       try {
-        // Relative path with query param
-        const response = await axios.get(`/bands/searchByBandName?bandName=${encodeURIComponent(bandName)}`);
+        const response = await api.get(`/bands/searchByBandName?bandName=${encodeURIComponent(bandName)}`);
         this.results = response.data.artists?.items || [];
       } catch (error) {
         console.error('Error searching for band:', error);
@@ -116,8 +114,7 @@ export default {
 
       this.isLoading = true;
       try {
-        // Relative path with param
-        const response = await axios.get(`/bands/${encodeURIComponent(spotifyId)}/albums`);
+        const response = await api.get(`/bands/${encodeURIComponent(spotifyId)}/albums`);
         this.results = response.data.items || [];
       } catch (error) {
         console.error('Error fetching albums:', error);
