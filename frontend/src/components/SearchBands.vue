@@ -82,7 +82,8 @@ export default {
     async searchByGenre() {
       this.isLoading = true;
       try {
-        const response = await axios.get('http://localhost:9000/bands/searchByDeathMetalGenre');
+        // Use relative path now
+        const response = await axios.get('/bands/searchByDeathMetalGenre');
         this.results = response.data.artists?.items || [];
       } catch (error) {
         console.error('Error fetching death metal bands:', error);
@@ -98,9 +99,8 @@ export default {
 
       this.isLoading = true;
       try {
-        const response = await axios.get(
-          `http://localhost:9000/bands/searchByBandName?bandName=${encodeURIComponent(bandName)}`
-        );
+        // Relative path with query param
+        const response = await axios.get(`/bands/searchByBandName?bandName=${encodeURIComponent(bandName)}`);
         this.results = response.data.artists?.items || [];
       } catch (error) {
         console.error('Error searching for band:', error);
@@ -116,9 +116,8 @@ export default {
 
       this.isLoading = true;
       try {
-        const response = await axios.get(
-          `http://localhost:9000/bands/${encodeURIComponent(spotifyId)}/albums`
-        );
+        // Relative path with param
+        const response = await axios.get(`/bands/${encodeURIComponent(spotifyId)}/albums`);
         this.results = response.data.items || [];
       } catch (error) {
         console.error('Error fetching albums:', error);
@@ -137,6 +136,7 @@ export default {
   },
 };
 </script>
+
 
 
 <style scoped>

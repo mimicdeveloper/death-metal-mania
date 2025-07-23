@@ -34,6 +34,8 @@
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { mapState } from 'vuex';
 
+const API_BASE_URL = import.meta.env.VITE_REMOTE_API;
+
 export default {
   name: 'SearchEvents',
   components: {
@@ -61,7 +63,7 @@ export default {
       this.isLoading = true;
       try {
         const response = await fetch(
-          `http://localhost:9000/events/search?band_name=${encodeURIComponent(bandName)}`
+          `${API_BASE_URL}/events/search?band_name=${encodeURIComponent(bandName)}`
         );
         const data = await response.json();
         this.events = data._embedded?.events || [];
@@ -96,51 +98,50 @@ export default {
       });
     },
     async handleEventAction(event) {
-  if (!this.user || !this.token) {
-    alert('Please log in to add favorites.');
-    return;
-  }
+      if (!this.user || !this.token) {
+        alert('Please log in to add favorites.');
+        return;
+      }
 
-  // Create full payload, but use eventId instead of id
-  const favoriteEvent = {
-  eventId: event.id,
-  name: event.name,
-  localDate: event.dates?.start?.localDate || '',
-  localTime: event.dates?.start?.localTime || '',
-  city: event._embedded?.venues?.[0]?.city?.name || '',
-  state: event._embedded?.venues?.[0]?.state?.name || '',
-  venue: event._embedded?.venues?.[0]?.name || '',
-  url: event.url,
-  info: event.info || '',
-};
+      // Create full payload, but use eventId instead of id
+      const favoriteEvent = {
+        eventId: event.id,
+        name: event.name,
+        localDate: event.dates?.start?.localDate || '',
+        localTime: event.dates?.start?.localTime || '',
+        city: event._embedded?.venues?.[0]?.city?.name || '',
+        state: event._embedded?.venues?.[0]?.state?.name || '',
+        venue: event._embedded?.venues?.[0]?.name || '',
+        url: event.url,
+        info: event.info || '',
+      };
 
-  try {
-    const response = await fetch('http://localhost:9000/favorites/events', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`,
-      },
-      body: JSON.stringify(favoriteEvent),
-    });
+      try {
+        const response = await fetch(`${API_BASE_URL}/favorites/events`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.token}`,
+          },
+          body: JSON.stringify(favoriteEvent),
+        });
 
-    if (response.ok) {
-      alert(`Added "${event.name}" to your favorites!`);
-    } else {
-      const errorText = await response.text();
-      console.error('Error:', errorText);
-      alert('Failed to add event to favorites.');
-    }
-  } catch (error) {
-    console.error('Network error:', error);
-    alert('Network error while adding event to favorites.');
-  }
-},
-
-
+        if (response.ok) {
+          alert(`Added "${event.name}" to your favorites!`);
+        } else {
+          const errorText = await response.text();
+          console.error('Error:', errorText);
+          alert('Failed to add event to favorites.');
+        }
+      } catch (error) {
+        console.error('Network error:', error);
+        alert('Network error while adding event to favorites.');
+      }
+    },
   },
 };
 </script>
+
 
 <style scoped>
 #search-section h2 {
