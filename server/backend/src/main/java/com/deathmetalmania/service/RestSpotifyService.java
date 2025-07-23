@@ -9,6 +9,7 @@ import org.springframework.web.client.RestClient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RestSpotifyService implements SpotifyService {
@@ -46,26 +47,27 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public SpotifyApi searchDeathMetalBands() {
-        RestClient restClient = RestClient.builder()
-                .baseUrl("https://api.spotify.com/v1")
-                .build();
+        String url = "https://api.spotify.com/v1/search";
+        RestClient restClient = RestClient.builder().baseUrl(url).build();
 
         List<SpotifyApi.Artist> allArtists = new ArrayList<>();
         int limit = 50;
         int maxPages = 2;
-        String query = "genre:\"death metal\"";  // Correct query string (not double encoded)
 
         for (int page = 0; page < maxPages; page++) {
             int offset = page * limit;
 
+            // Double-encoded query for genre:"death metal"
+            String encodedQuery = "genre%253A%2522death%2520metal%2522";
+
             SpotifyApi partialResults = restClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/search")
-                            .queryParam("q", query)
+                            .queryParam("q", encodedQuery)
                             .queryParam("type", "artist")
-                            .queryParam("limit", limit)
-                            .queryParam("offset", offset)
-                            .build())
+                            .queryParam("limit", String.valueOf(limit))
+                            .queryParam("offset", String.valueOf(offset))
+                            .build()
+                    )
                     .header("Authorization", "Bearer " + getAccessToken())
                     .retrieve()
                     .body(SpotifyApi.class);
@@ -85,8 +87,29 @@ public class RestSpotifyService implements SpotifyService {
             throw new ServiceException("No artists found using fallback query.");
         }
 
+        // Filter out black metal, metalcore, nu metal, and banned bands "Chon" and "Heavy//Hitter"
+        List<SpotifyApi.Artist> filteredArtists = allArtists.stream()
+                .filter(artist -> {
+                    String artistName = artist.getName() != null ? artist.getName().toLowerCase() : "";
+                    boolean isBannedBand = artistName.equals("chon") || artistName.equals("heavy//hitter");
+                    boolean hasBlockedGenre = artist.getGenres() != null && artist.getGenres().stream().anyMatch(
+                            genre -> {
+                                String lowerGenre = genre.toLowerCase();
+                                return lowerGenre.contains("black metal") ||
+                                        lowerGenre.contains("metalcore") ||
+                                        lowerGenre.contains("nu metal");
+                            }
+                    );
+                    return !isBannedBand && !hasBlockedGenre;
+                })
+                .collect(Collectors.toList());
+
+        if (filteredArtists.isEmpty()) {
+            throw new ServiceException("No suitable death metal artists found after filtering.");
+        }
+
         SpotifyApi.ArtistResponse response = new SpotifyApi.ArtistResponse();
-        response.setItems(allArtists);
+        response.setItems(filteredArtists);
         SpotifyApi finalResult = new SpotifyApi();
         finalResult.setArtists(response);
 
