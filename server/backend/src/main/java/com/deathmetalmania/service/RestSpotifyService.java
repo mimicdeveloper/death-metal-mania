@@ -46,27 +46,26 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public SpotifyApi searchDeathMetalBands() {
-        String url = "https://api.spotify.com/v1/search";
-        RestClient restClient = RestClient.builder().baseUrl(url).build();
+        RestClient restClient = RestClient.builder()
+                .baseUrl("https://api.spotify.com/v1")
+                .build();
 
         List<SpotifyApi.Artist> allArtists = new ArrayList<>();
         int limit = 50;
         int maxPages = 2;
+        String query = "genre:\"death metal\"";  // Correct query string (not double encoded)
 
         for (int page = 0; page < maxPages; page++) {
             int offset = page * limit;
 
-            // Keep your over-encoded query as is if intentional
-            String encodedQuery = "genre%253deathmetal";
-
             SpotifyApi partialResults = restClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .queryParam("q", encodedQuery)
+                            .path("/search")
+                            .queryParam("q", query)
                             .queryParam("type", "artist")
-                            .queryParam("limit", String.valueOf(limit))
-                            .queryParam("offset", String.valueOf(offset))
-                            .build()
-                    )
+                            .queryParam("limit", limit)
+                            .queryParam("offset", offset)
+                            .build())
                     .header("Authorization", "Bearer " + getAccessToken())
                     .retrieve()
                     .body(SpotifyApi.class);
@@ -93,6 +92,7 @@ public class RestSpotifyService implements SpotifyService {
 
         return finalResult;
     }
+
 
     @Override
     public BandDetails getBandById(String spotifyId) {
