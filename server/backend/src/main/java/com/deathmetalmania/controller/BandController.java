@@ -95,6 +95,10 @@ public class BandController {
         }
     }
 
+    @GetMapping("/ping")
+    public String ping() {
+        return "pong";
+    }
     // Retrieve albums by band from Spotify Id
     @RequestMapping(path = "/{spotifyId}/albums", method = RequestMethod.GET)
     public AlbumResponse getAlbumsByBandId(@PathVariable("spotifyId") String spotifyId) {
