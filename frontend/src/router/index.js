@@ -13,7 +13,6 @@ import FavoritesView from '../views/FavoritesView.vue'
 import AdminView from '../views/AdminView.vue'
 import EventsView from '../views/EventsView.vue'
 
-
 const routes = [
   {
     path: '/',
@@ -84,27 +83,27 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/deathmetalmania/'), // 👈 Required for GitHub Pages deployment
   routes
-});
+})
 
 router.beforeEach((to) => {
-  const store = useStore();
-  const requiresAuth = to.matched.some(x => x.meta.requiresAuth);
-  const userRole = store.state.user.role;
+  const store = useStore()
+  const requiresAuth = to.matched.some(x => x.meta.requiresAuth)
+  const userRole = store.state.user.role
 
   if (requiresAuth && store.state.token === '') {
-    return { name: 'login' };
+    return { name: 'login' }
   }
 
   if (to.name === 'admin' && userRole !== 'ROLE_ADMIN') {
-    return { name: 'home' };
+    return { name: 'home' }
   }
 
-  const userRoutes = ['user', 'profile', 'update-profile', 'favorites', 'events'];
+  const userRoutes = ['user', 'profile', 'update-profile', 'favorites', 'events']
   if (userRoutes.includes(to.name) && !['ROLE_USER', 'ROLE_ADMIN'].includes(userRole)) {
-    return { name: 'home' };
+    return { name: 'home' }
   }
-});
+})
 
-export default router;
+export default router
