@@ -30,20 +30,19 @@ export function createStore(currentToken, currentUser) {
         state.favoriteEvents = events;
       },
       ADD_FAVORITE_EVENT(state, event) {
-        // Use eventId to match backend event property
-        const exists = state.favoriteEvents.some(e => e.eventId === event.eventId);
+        const exists = state.favoriteEvents.some(e => e.id === event.id);
         if (!exists) {
           state.favoriteEvents.push(event);
         }
       },
       REMOVE_FAVORITE_EVENT(state, eventId) {
-        state.favoriteEvents = state.favoriteEvents.filter(e => e.eventId !== eventId);
+        state.favoriteEvents = state.favoriteEvents.filter(e => e.id !== eventId);
       }
     },
     actions: {
       async fetchFavoriteEvents({ commit, state }) {
         try {
-          const response = await axios.get('/favorites/events', {
+          const response = await axios.get('http://localhost:9000/favorites/events', {
             headers: {
               Authorization: `Bearer ${state.token}`,
             },
@@ -57,12 +56,12 @@ export function createStore(currentToken, currentUser) {
       async addFavoriteEvent({ commit, state }, event) {
         try {
           await axios.post(
-            '/favorites/events',
+            'http://localhost:9000/favorites/events',
             {
-              eventId: event.eventId,      // match backend
+              eventId: event.id,
               eventName: event.name,
-              localDate: event.localDate || event.dates?.start?.localDate,
-              localTime: event.localTime || event.dates?.start?.localTime,
+              localDate: event.dates?.start?.localDate,
+              localTime: event.dates?.start?.localTime,
               city: event.city,
               state: event.state,
               venue: event.venue,
@@ -84,7 +83,7 @@ export function createStore(currentToken, currentUser) {
       },
       async removeFavoriteEvent({ commit, state }, eventId) {
         try {
-          await axios.delete(`/favorites/events/${eventId}`, {
+          await axios.delete(`http://localhost:9000/favorites/events/${eventId}`, {
             headers: {
               Authorization: `Bearer ${state.token}`,
             },

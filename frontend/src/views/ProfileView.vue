@@ -1,20 +1,20 @@
 <template>
-  <main>
-    <section class="profile-section">
-      <h2>User Profile</h2>
-      <div id="profileContainer" class="profile-container" v-if="profile">
-        <p><strong>Profile ID:</strong> {{ profile.profileId }}</p>
-        <p><strong>User ID:</strong> {{ profile.userId }}</p>
-        <p><strong>First Name:</strong> {{ profile.firstName }}</p>
-        <p><strong>Last Name:</strong> {{ profile.lastName }}</p>
-        <p><strong>Email:</strong> {{ profile.email }}</p>
-      </div>
-    </section>
-  </main>
-</template>
+    <main>
+      <section class="profile-section">
+        <h2>User Profile</h2>
+        <div id="profileContainer" class="profile-container" v-if="profile">
+          <p><strong>Profile ID:</strong> {{ profile.profileId }}</p>
+          <p><strong>User ID:</strong> {{ profile.userId }}</p>
+          <p><strong>First Name:</strong> {{ profile.firstName }}</p>
+          <p><strong>Last Name:</strong> {{ profile.lastName }}</p>
+          <p><strong>Email:</strong> {{ profile.email }}</p>
+        </div>
+      </section>
+    </main>
+  </template>
 
 <script>
-import api from '@/api.js';
+import axios from 'axios';
 
 export default {
   data() {
@@ -23,23 +23,27 @@ export default {
     };
   },
   created() {
-    if (!this.$store.state.token) {
+    const token = localStorage.getItem('token');
+    if (!token) {
       this.$router.push('/login');
       return;
     }
 
-    api.get('/user')
+    axios.get('http://localhost:9000/user', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
       .then(response => {
         this.profile = response.data;
       })
       .catch(error => {
         console.error('Failed to fetch profile:', error);
-        this.$store.commit('LOGOUT');
+        localStorage.removeItem('token');
         this.$router.push('/login');
       });
   }
 }
 </script>
+
 
 <style scoped>
 .profile-section {
@@ -75,4 +79,5 @@ export default {
 .profile-container strong {
   color: #ccc;
 }
+
 </style>

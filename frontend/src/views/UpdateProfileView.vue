@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import api from '@/api.js';
+import axios from 'axios';
 
 export default {
   name: 'UpdateProfileView',
@@ -39,31 +39,31 @@ export default {
     };
   },
   created() {
-    if (!this.$store.state.token) {
+    const token = localStorage.getItem('token');
+    if (!token) {
       this.$router.push('/login');
       return;
     }
 
-    api.get('/user')
-      .then(response => {
-        const { email, firstName, lastName } = response.data;
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-      })
-      .catch(error => {
-        console.error('Failed to load profile:', error);
-        this.$store.commit('LOGOUT'); // clean logout
-        this.$router.push('/login');
-      });
+    axios.get('http://localhost:9000/user', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(response => {
+      const { email, firstName, lastName } = response.data;
+      this.email = email;
+      this.firstName = firstName;
+      this.lastName = lastName;
+    })
+    .catch(error => {
+      console.error('Failed to load profile:', error);
+      localStorage.removeItem('token');
+      this.$router.push('/login');
+    });
   },
   methods: {
     async updateProfile() {
       try {
-        if (!this.$store.state.token) {
-          this.$router.push('/login');
-          return;
-        }
+        const token = this.$store.state.token;
 
         const profileData = {
           firstName: this.firstName,
@@ -71,13 +71,18 @@ export default {
           email: this.email
         };
 
-        await api.put('/user', profileData);
+        await axios.put('http://localhost:9000/user', profileData, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
 
         this.status.message = 'Profile updated successfully.';
         this.status.type = 'success';
 
       } catch (err) {
-        console.error('Failed to update profile:', err);
+        console.error(err);
         if (err.response && err.response.data) {
           this.status.message = `Failed to update profile: ${err.response.data.message || 'Unknown error'}`;
         } else {
@@ -148,6 +153,7 @@ form button:hover {
   background-color: #a30000;
 }
 
+/* Status message styling */
 .status-message {
   margin-top: 1rem;
   padding: 0.75rem 1rem;
