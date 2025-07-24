@@ -23,7 +23,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+// Import your centralized axios instance with baseURL configured for Koyeb
+import api from '@/api.js';
 
 export default {
   name: 'UpdateProfileView',
@@ -45,7 +46,7 @@ export default {
       return;
     }
 
-    axios.get('http://localhost:9000/user', {
+    api.get('/user', {
       headers: { Authorization: `Bearer ${token}` }
     })
     .then(response => {
@@ -63,7 +64,11 @@ export default {
   methods: {
     async updateProfile() {
       try {
-        const token = this.$store.state.token;
+        const token = localStorage.getItem('token');
+        if (!token) {
+          this.$router.push('/login');
+          return;
+        }
 
         const profileData = {
           firstName: this.firstName,
@@ -71,9 +76,9 @@ export default {
           email: this.email
         };
 
-        await axios.put('http://localhost:9000/user', profileData, {
+        await api.put('/user', profileData, {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
@@ -153,7 +158,6 @@ form button:hover {
   background-color: #a30000;
 }
 
-/* Status message styling */
 .status-message {
   margin-top: 1rem;
   padding: 0.75rem 1rem;

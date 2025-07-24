@@ -1,20 +1,20 @@
 <template>
-    <main>
-      <section class="profile-section">
-        <h2>User Profile</h2>
-        <div id="profileContainer" class="profile-container" v-if="profile">
-          <p><strong>Profile ID:</strong> {{ profile.profileId }}</p>
-          <p><strong>User ID:</strong> {{ profile.userId }}</p>
-          <p><strong>First Name:</strong> {{ profile.firstName }}</p>
-          <p><strong>Last Name:</strong> {{ profile.lastName }}</p>
-          <p><strong>Email:</strong> {{ profile.email }}</p>
-        </div>
-      </section>
-    </main>
-  </template>
+  <main>
+    <section class="profile-section">
+      <h2>User Profile</h2>
+      <div id="profileContainer" class="profile-container" v-if="profile">
+        <p><strong>Profile ID:</strong> {{ profile.profileId }}</p>
+        <p><strong>User ID:</strong> {{ profile.userId }}</p>
+        <p><strong>First Name:</strong> {{ profile.firstName }}</p>
+        <p><strong>Last Name:</strong> {{ profile.lastName }}</p>
+        <p><strong>Email:</strong> {{ profile.email }}</p>
+      </div>
+    </section>
+  </main>
+</template>
 
 <script>
-import axios from 'axios';
+import api from '@/api.js'; // Import your Axios instance
 
 export default {
   data() {
@@ -29,23 +29,23 @@ export default {
       return;
     }
 
-    axios.get('http://localhost:9000/user', {
+    api.get('/user', {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(response => {
-        this.profile = response.data;
-      })
-      .catch(error => {
-        console.error('Failed to fetch profile:', error);
-        localStorage.removeItem('token');
-        this.$router.push('/login');
-      });
+    .then(response => {
+      this.profile = response.data;
+    })
+    .catch(error => {
+      console.error('Failed to fetch profile:', error);
+      localStorage.removeItem('token');
+      this.$router.push('/login');
+    });
   }
 }
 </script>
 
-
 <style scoped>
+/* your existing styles here */
 .profile-section {
   display: flex;
   flex-direction: column;
@@ -79,5 +79,4 @@ export default {
 .profile-container strong {
   color: #ccc;
 }
-
 </style>
