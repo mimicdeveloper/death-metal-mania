@@ -57,7 +57,7 @@ public class RestSpotifyService implements SpotifyService {
         for (int page = 0; page < maxPages; page++) {
             int offset = page * limit;
 
-            // Double-encoded query for genre:"death metal"
+            // Correct double-encoded query for genre:"death metal"
             String encodedQuery = "genre%253A%2522death%2520metal%2522";
 
             SpotifyApi partialResults = restClient.get()
@@ -87,7 +87,7 @@ public class RestSpotifyService implements SpotifyService {
             throw new ServiceException("No artists found using fallback query.");
         }
 
-        // Filter out black metal, metalcore, nu metal, and banned bands "Chon" and "Heavy//Hitter"
+        // Filtering out black metal, metalcore, nu metal, and banned bands "Chon" and "Heavy//Hitter"
         List<SpotifyApi.Artist> filteredArtists = allArtists.stream()
                 .filter(artist -> {
                     String artistName = artist.getName() != null ? artist.getName().toLowerCase() : "";
