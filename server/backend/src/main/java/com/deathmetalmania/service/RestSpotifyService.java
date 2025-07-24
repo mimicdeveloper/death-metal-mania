@@ -1,12 +1,16 @@
 package com.deathmetalmania.service;
 
+import com.deathmetalmania.exception.ServiceException;
 import com.deathmetalmania.model.api.spotify.AlbumResponse;
 import com.deathmetalmania.model.api.spotify.BandDetails;
 import com.deathmetalmania.model.api.spotify.SpotifyApi;
-import com.deathmetalmania.exception.ServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,15 +18,14 @@ import java.util.stream.Collectors;
 @Service
 public class RestSpotifyService implements SpotifyService {
 
+    private static final Logger logger = LoggerFactory.getLogger(RestSpotifyService.class);
     private final String BASE_URL = "https://api.spotify.com/v1/";
     private final SpotifyTokenService spotifyTokenService;
 
-    // Inject SpotifyTokenService via constructor
     public RestSpotifyService(SpotifyTokenService spotifyTokenService) {
         this.spotifyTokenService = spotifyTokenService;
     }
 
-    // Helper method to get current token dynamically
     private String getAccessToken() {
         return spotifyTokenService.getAccessToken();
     }
@@ -30,6 +33,9 @@ public class RestSpotifyService implements SpotifyService {
     @Override
     public SpotifyApi searchByBandName(String bandName) {
         String url = BASE_URL + "search?q=" + bandName + "&type=artist&limit=3";
+
+        logger.info("Searching for band name: {}", bandName);
+        logger.debug("Outgoing URL: {}", url);
 
         RestClient restClient = RestClient.create();
         SpotifyApi fullResults = restClient.get()
@@ -47,17 +53,21 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public SpotifyApi searchDeathMetalBands() {
-        String url = "https://api.spotify.com/v1/search";
-        RestClient restClient = RestClient.builder().baseUrl(url).build();
+        String baseUrl = "https://api.spotify.com/v1/search";
+        RestClient restClient = RestClient.builder().baseUrl(baseUrl).build();
 
         List<SpotifyApi.Artist> allArtists = new ArrayList<>();
         int limit = 50;
         int maxPages = 2;
+        String encodedQuery = "genre%3A%22death%20metal%22";
+        String decodedQuery = URLDecoder.decode(encodedQuery, StandardCharsets.UTF_8);
+
+        logger.info("Starting search for: {}", decodedQuery);
 
         for (int page = 0; page < maxPages; page++) {
             int offset = page * limit;
 
-            String encodedQuery = "genre%3A%22death%20metal%22";
+            logger.debug("Requesting page {} with offset {} and limit {}", page + 1, offset, limit);
 
             SpotifyApi partialResults = restClient.get()
                     .uri(uriBuilder -> uriBuilder
@@ -72,9 +82,11 @@ public class RestSpotifyService implements SpotifyService {
                     .body(SpotifyApi.class);
 
             if (partialResults == null || partialResults.getArtists() == null || partialResults.getArtists().getItems() == null) {
+                logger.warn("No results returned for page {}", page + 1);
                 break;
             }
 
+            logger.info("Retrieved {} artists on page {}", partialResults.getArtists().getItems().size(), page + 1);
             allArtists.addAll(partialResults.getArtists().getItems());
 
             if (partialResults.getArtists().getItems().size() < limit) {
@@ -86,7 +98,6 @@ public class RestSpotifyService implements SpotifyService {
             throw new ServiceException("No artists found using fallback query.");
         }
 
-        // Filter out black metal, metalcore, nu metal, and banned bands "Chon" and "Heavy//Hitter"
         List<SpotifyApi.Artist> filteredArtists = allArtists.stream()
                 .filter(artist -> {
                     String artistName = artist.getName() != null ? artist.getName().toLowerCase() : "";
@@ -103,6 +114,8 @@ public class RestSpotifyService implements SpotifyService {
                 })
                 .collect(Collectors.toList());
 
+        logger.info("Filtered artists down to {} after genre and name filtering", filteredArtists.size());
+
         if (filteredArtists.isEmpty()) {
             throw new ServiceException("No suitable death metal artists found after filtering.");
         }
@@ -115,10 +128,10 @@ public class RestSpotifyService implements SpotifyService {
         return finalResult;
     }
 
-
     @Override
     public BandDetails getBandById(String spotifyId) {
         String url = BASE_URL + "artists/" + spotifyId;
+        logger.info("Fetching band details for ID: {}", spotifyId);
 
         RestClient restClient = RestClient.create();
         BandDetails bandDetails = restClient.get()
@@ -137,6 +150,7 @@ public class RestSpotifyService implements SpotifyService {
     @Override
     public AlbumResponse getAlbumsByBandId(String spotifyId) {
         String url = BASE_URL + "artists/" + spotifyId + "/albums";
+        logger.info("Fetching albums for band ID: {}", spotifyId);
 
         RestClient restClient = RestClient.create();
         AlbumResponse albumsDetails = restClient.get()
