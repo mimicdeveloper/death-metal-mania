@@ -58,7 +58,7 @@ public class RestSpotifyService implements SpotifyService {
             int offset = page * limit;
 
             // Correct double-encoded query for genre:"death metal"
-            String encodedQuery = "genre%253A%2522death%2520metal%2522";
+            String encodedQuery = "genre%3A%22death%20metal%22";
 
             SpotifyApi partialResults = restClient.get()
                     .uri(uriBuilder -> uriBuilder
