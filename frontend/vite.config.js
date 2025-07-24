@@ -1,14 +1,13 @@
-/// <reference types="vite/client" />
-import { fileURLToPath, URL } from 'url'
+import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/death-metal-mania/', // 👈 Adjust this if your repo name changes
   plugins: [vue()],
   define: {
+    // quiet warning about value not being explicitly defined
     __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false'
   },
   resolve: {
