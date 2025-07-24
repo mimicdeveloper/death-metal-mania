@@ -57,15 +57,14 @@ public class RestSpotifyService implements SpotifyService {
         for (int page = 0; page < maxPages; page++) {
             int offset = page * limit;
 
-            // Use plain string here, NOT URL encoded
-            String query = "genre:\"death metal\"";
+            String encodedQuery = "genre%3A%22death%20metal%22";
 
             SpotifyApi partialResults = restClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .queryParam("q", query)
+                            .queryParam("q", encodedQuery)
                             .queryParam("type", "artist")
-                            .queryParam("limit", limit)
-                            .queryParam("offset", offset)
+                            .queryParam("limit", String.valueOf(limit))
+                            .queryParam("offset", String.valueOf(offset))
                             .build()
                     )
                     .header("Authorization", "Bearer " + getAccessToken())
@@ -115,7 +114,6 @@ public class RestSpotifyService implements SpotifyService {
 
         return finalResult;
     }
-
 
 
     @Override
