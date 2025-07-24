@@ -1,13 +1,12 @@
-import axios from 'axios';
+// services/AuthService.js
+
+import api from '../api.js';  // your configured Axios instance
 
 export default {
-
   login(user) {
-    return axios.post('/login', user)
+    return api.post('/login', user);
   },
-
   register(user) {
-    return axios.post('/register', user)
+    return api.post('/register', user);
   }
-
 }
