@@ -54,6 +54,7 @@
         </div>
       </div>
 
+
       <form v-on:submit.prevent="addBand">
         <input v-model="bandSpotifyId" type="text" placeholder="Spotify ID" required />
         <input v-model="bandName" type="text" placeholder="Band Name" required />
@@ -97,6 +98,7 @@
         </div>
       </div>
 
+
       <form v-on:submit.prevent="addEvent">
         <input v-model="addBandId" type="number" placeholder="Band ID" required />
         <input v-model="addEventName" type="text" placeholder="Event Name" required />
@@ -128,7 +130,7 @@
 </template>
 
 <script>
-import api from '@/api.js'; // your axios instance configured with Koyeb backend
+import axios from 'axios';
 
 export default {
   data() {
@@ -156,6 +158,7 @@ export default {
       updateFirstName: '',
       updateLastName: '',
       updateEmail: '',
+      deleteUserId: '',
 
       // Band input fields
       bandSpotifyId: '',
@@ -167,9 +170,10 @@ export default {
       updateBandName: '',
       updateBandGenre: '',
       updateBandCountry: '',
+      deleteBandId: '',
+      addBandId: '',
 
       // Event input fields
-      addBandId: '',
       addEventName: '',
       addEventDate: '',
       addVenue: '',
@@ -186,7 +190,8 @@ export default {
       updateCountryCode: '',
       updateMinPrice: '',
       updateMaxPrice: '',
-      updateInfo: ''
+      updateInfo: '',
+      deleteEventId: ''
     };
   },
 
@@ -204,7 +209,7 @@ export default {
 
   methods: {
     getAuthHeader() {
-      const token = localStorage.getItem('token');
+      const token = this.$store.state.token;
       return {
         headers: {
           Authorization: `Bearer ${token}`
@@ -217,7 +222,7 @@ export default {
     // --------------------
     async getAllUsers(clearStatus = true) {
       try {
-        const res = await api.get('/admin/users', this.getAuthHeader());
+        const res = await axios.get('http://localhost:9000/admin/users', this.getAuthHeader());
         this.usersListRaw = res.data;
         this.showUsersList = true;
         if (clearStatus) {
@@ -237,7 +242,7 @@ export default {
 
     async getUserById() {
       try {
-        const res = await api.get(`/admin/users/${this.userIdInput}`, this.getAuthHeader());
+        const res = await axios.get(`http://localhost:9000/admin/users/${this.userIdInput}`, this.getAuthHeader());
         const user = res.data;
         this.statusMessage.user = `User found: ${user.firstName} ${user.lastName}, Email: ${user.email}`;
       } catch (error) {
@@ -257,7 +262,7 @@ export default {
           lastName: this.updateLastName,
           email: this.updateEmail
         };
-        await api.put(`/admin/users/${this.updateUserId}`, body, this.getAuthHeader());
+        await axios.put(`http://localhost:9000/admin/users/${this.updateUserId}`, body, this.getAuthHeader());
         this.statusMessage.user = 'User updated successfully.';
 
         // Clear inputs
@@ -278,22 +283,23 @@ export default {
     },
 
     async deleteUserById(userId) {
-      try {
-        await api.delete(`/admin/users/${userId}`, this.getAuthHeader());
-        this.statusMessage.user = `User ${userId} deleted.`;
-        this.getAllUsers(false); // Refresh list
-      } catch (err) {
-        this.statusMessage.user = `Failed to delete user ${userId}.`;
-        console.error('Delete user error:', err);
-      }
-    },
+  try {
+    await axios.delete(`http://localhost:9000/admin/users/${userId}`, this.getAuthHeader());
+    this.statusMessage.user = `User ${userId} deleted.`;
+    this.getAllUsers(false); // Refresh list
+  } catch (err) {
+    this.statusMessage.user = `Failed to delete user ${userId}.`;
+    console.error('Delete user error:', err);
+  }
+},
+
 
     // --------------------
     // BAND METHODS
     // --------------------
     async getAllBands(clearStatus = true) {
       try {
-        const res = await api.get('/bands', this.getAuthHeader());
+        const res = await axios.get('http://localhost:9000/bands', this.getAuthHeader());
         this.bandsListRaw = res.data;
         this.showBandsList = true;
         if (clearStatus) {
@@ -318,7 +324,7 @@ export default {
           genre: this.bandGenre,
           country: this.bandCountry
         };
-        await api.post('/admin/bands', body, this.getAuthHeader());
+        await axios.post('http://localhost:9000/admin/bands', body, this.getAuthHeader());
         this.statusMessage.band = 'Band added successfully.';
 
         // Clear inputs
@@ -341,7 +347,7 @@ export default {
           genre: this.updateBandGenre,
           country: this.updateBandCountry
         };
-        await api.put(`/admin/bands/${this.updateBandId}`, body, this.getAuthHeader());
+        await axios.put(`http://localhost:9000/admin/bands/${this.updateBandId}`, body, this.getAuthHeader());
         this.statusMessage.band = 'Band updated successfully.';
 
         // Clear inputs
@@ -358,22 +364,22 @@ export default {
     },
 
     async deleteBandById(bandId) {
-      try {
-        await api.delete(`/admin/bands/${bandId}`, this.getAuthHeader());
-        this.statusMessage.band = `Band ${bandId} deleted.`;
-        this.getAllBands(false); // Refresh list
-      } catch (err) {
-        this.statusMessage.band = `Failed to delete band ${bandId}.`;
-        console.error('Delete band error:', err);
-      }
-    },
+  try {
+    await axios.delete(`http://localhost:9000/admin/bands/${bandId}`, this.getAuthHeader());
+    this.statusMessage.band = `Band ${bandId} deleted.`;
+    this.getAllBands(false); // Refresh list
+  } catch (err) {
+    this.statusMessage.band = `Failed to delete band ${bandId}.`;
+    console.error('Delete band error:', err);
+  }
+},
 
     // --------------------
     // EVENT METHODS
     // --------------------
     async getAllEvents(clearStatus = true) {
       try {
-        const res = await api.get('/events', this.getAuthHeader());
+        const res = await axios.get('http://localhost:9000/events', this.getAuthHeader());
         this.eventsListRaw = res.data;
         this.showEventsList = true;
         if (clearStatus) {
@@ -408,7 +414,7 @@ export default {
           maxPrice: this.addMaxPrice,
           info: this.addInfo
         };
-        await api.post('/admin/events', body, this.getAuthHeader());
+        await axios.post('http://localhost:9000/admin/events', body, this.getAuthHeader());
         this.statusMessage.event = 'Event added successfully.';
 
         // Clear inputs
@@ -441,7 +447,7 @@ export default {
           maxPrice: this.updateMaxPrice,
           info: this.updateInfo
         };
-        await api.put(`/admin/events/${this.updateEventId}`, body, this.getAuthHeader());
+        await axios.put(`http://localhost:9000/admin/events/${this.updateEventId}`, body, this.getAuthHeader());
         this.statusMessage.event = 'Event updated successfully.';
 
         // Clear inputs
@@ -463,21 +469,22 @@ export default {
     },
 
     async deleteEventById(eventId) {
-      try {
-        await api.delete(`/admin/events/${eventId}`, this.getAuthHeader());
-        this.statusMessage.event = `Event ${eventId} deleted.`;
-        this.getAllEvents(false); // Refresh list
-      } catch (err) {
-        this.statusMessage.event = `Failed to delete event ${eventId}.`;
-        console.error('Delete event error:', err);
-      }
+  try {
+    await axios.delete(`http://localhost:9000/admin/events/${eventId}`, this.getAuthHeader());
+    this.statusMessage.event = `Event ${eventId} deleted.`;
+    this.getAllEvents(false); // Refresh list
+  } catch (err) {
+    this.statusMessage.event = `Failed to delete event ${eventId}.`;
+    console.error('Delete event error:', err);
     }
   }
+}
 };
 </script>
 
-<style scoped>
-/* Your existing styles here, unchanged */
+
+  
+  <style scoped>
 .status-message {
   color: white;
   font-weight: bold;
@@ -561,7 +568,7 @@ form button:hover {
 }
 
 button.get-all {
-  background-color: crimson;
+  background-color: crimson; 
   color: white;
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
@@ -573,7 +580,7 @@ button.get-all {
 }
 
 button.clear-button {
-  background-color: crimson;
+  background-color: crimson; 
   color: white;
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
@@ -585,22 +592,18 @@ button.clear-button {
 }
 
 button.get-all:hover {
-  background-color: #a30000;
+  background-color: #a30000; 
 }
 
 button.clear-button:hover {
-  background-color: #a30000;
+  background-color: #a30000; 
 }
 
-#usersList,
-#allBandsList,
-#eventsList {
+#usersList, #allBandsList, #eventsList {
   margin-top: 1.5rem;
 }
 
-.user-card,
-.band-card,
-.event-card {
+.user-card, .band-card, .event-card {
   background-color: #333;
   border-radius: 8px;
   padding: 1rem;
@@ -608,9 +611,7 @@ button.clear-button:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
-.user-card p,
-.band-card p,
-.event-card p {
+.user-card p, .band-card p, .event-card p {
   margin-bottom: 0.5rem;
 }
 
@@ -619,12 +620,12 @@ button.clear-button:hover {
   margin: 2rem 0;
 }
 
-button[type='submit']:hover {
+button[type="submit"]:hover {
   background-color: #a30000;
 }
 
 button.delete-button {
-  background-color: crimson;
+  background-color: crimson; 
   color: white;
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
@@ -638,4 +639,8 @@ button.delete-button {
 button.delete-button:hover {
   background-color: #a30000;
 }
+
 </style>
+
+
+  
