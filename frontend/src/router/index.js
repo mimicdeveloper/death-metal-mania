@@ -83,7 +83,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory('/deathmetalmania/'), // 👈 Required for GitHub Pages deployment
+  history: createWebHistory('/death-metal-mania/'), // 👈 Required for GitHub Pages deployment
   routes
 })
 
