@@ -8,8 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URLDecoder;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,13 +37,21 @@ public class RestSpotifyService implements SpotifyService {
 
         logger.info("Searching for band name: {}", bandName);
         logger.debug("Outgoing URL: {}", url);
+        logger.debug("Using Spotify Access Token (partial): {}",
+                getAccessToken() != null ? getAccessToken().substring(0, 10) + "..." : "null");
 
         RestClient restClient = RestClient.create();
-        SpotifyApi fullResults = restClient.get()
-                .uri(url)
-                .header("Authorization", "Bearer " + getAccessToken())
-                .retrieve()
-                .body(SpotifyApi.class);
+        SpotifyApi fullResults;
+        try {
+            fullResults = restClient.get()
+                    .uri(url)
+                    .header("Authorization", "Bearer " + getAccessToken())
+                    .retrieve()
+                    .body(SpotifyApi.class);
+        } catch (Exception ex) {
+            logger.error("Spotify API call failed for bandName '{}': {}", bandName, ex.getMessage(), ex);
+            throw new ServiceException("Spotify API call error", ex);
+        }
 
         if (fullResults == null || fullResults.getArtists() == null || fullResults.getArtists().getItems().isEmpty()) {
             throw new ServiceException("No bands found matching: " + bandName);
@@ -53,33 +62,42 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public SpotifyApi searchDeathMetalBands() {
-        String baseUrl = "https://api.spotify.com/v1/search";
-        RestClient restClient = RestClient.builder().baseUrl(baseUrl).build();
+        String searchEndpoint = BASE_URL + "search";
+        RestClient restClient = RestClient.builder().baseUrl(searchEndpoint).build();
 
         List<SpotifyApi.Artist> allArtists = new ArrayList<>();
         int limit = 50;
         int maxPages = 2;
-        String encodedQuery = "genre%3A%22death%20metal%22";
-        String decodedQuery = URLDecoder.decode(encodedQuery, StandardCharsets.UTF_8);
+        String decodedQuery = "genre:\"death metal\"";
 
         logger.info("Starting search for: {}", decodedQuery);
 
         for (int page = 0; page < maxPages; page++) {
             int offset = page * limit;
 
-            logger.debug("Requesting page {} with offset {} and limit {}", page + 1, offset, limit);
+            URI uri = UriComponentsBuilder.fromUriString(searchEndpoint)
+                    .queryParam("q", decodedQuery)
+                    .queryParam("type", "artist")
+                    .queryParam("limit", limit)
+                    .queryParam("offset", offset)
+                    .build()
+                    .toUri();
 
-            SpotifyApi partialResults = restClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .queryParam("q", encodedQuery)
-                            .queryParam("type", "artist")
-                            .queryParam("limit", String.valueOf(limit))
-                            .queryParam("offset", String.valueOf(offset))
-                            .build()
-                    )
-                    .header("Authorization", "Bearer " + getAccessToken())
-                    .retrieve()
-                    .body(SpotifyApi.class);
+            logger.debug("Requesting page {} with URI: {}", page + 1, uri);
+            logger.debug("Using Spotify Access Token (partial): {}",
+                    getAccessToken() != null ? getAccessToken().substring(0, 10) + "..." : "null");
+
+            SpotifyApi partialResults;
+            try {
+                partialResults = restClient.get()
+                        .uri(uri)
+                        .header("Authorization", "Bearer " + getAccessToken())
+                        .retrieve()
+                        .body(SpotifyApi.class);
+            } catch (Exception ex) {
+                logger.error("Spotify API call failed on page {}: {}", page + 1, ex.getMessage(), ex);
+                throw new ServiceException("Spotify API call error", ex);
+            }
 
             if (partialResults == null || partialResults.getArtists() == null || partialResults.getArtists().getItems() == null) {
                 logger.warn("No results returned for page {}", page + 1);
@@ -132,13 +150,21 @@ public class RestSpotifyService implements SpotifyService {
     public BandDetails getBandById(String spotifyId) {
         String url = BASE_URL + "artists/" + spotifyId;
         logger.info("Fetching band details for ID: {}", spotifyId);
+        logger.debug("Using Spotify Access Token (partial): {}",
+                getAccessToken() != null ? getAccessToken().substring(0, 10) + "..." : "null");
 
         RestClient restClient = RestClient.create();
-        BandDetails bandDetails = restClient.get()
-                .uri(url)
-                .header("Authorization", "Bearer " + getAccessToken())
-                .retrieve()
-                .body(BandDetails.class);
+        BandDetails bandDetails;
+        try {
+            bandDetails = restClient.get()
+                    .uri(url)
+                    .header("Authorization", "Bearer " + getAccessToken())
+                    .retrieve()
+                    .body(BandDetails.class);
+        } catch (Exception ex) {
+            logger.error("Spotify API call failed for bandId '{}': {}", spotifyId, ex.getMessage(), ex);
+            throw new ServiceException("Spotify API call error", ex);
+        }
 
         if (bandDetails == null) {
             throw new ServiceException("Band not found for Spotify ID: " + spotifyId);
@@ -151,13 +177,21 @@ public class RestSpotifyService implements SpotifyService {
     public AlbumResponse getAlbumsByBandId(String spotifyId) {
         String url = BASE_URL + "artists/" + spotifyId + "/albums";
         logger.info("Fetching albums for band ID: {}", spotifyId);
+        logger.debug("Using Spotify Access Token (partial): {}",
+                getAccessToken() != null ? getAccessToken().substring(0, 10) + "..." : "null");
 
         RestClient restClient = RestClient.create();
-        AlbumResponse albumsDetails = restClient.get()
-                .uri(url)
-                .header("Authorization", "Bearer " + getAccessToken())
-                .retrieve()
-                .body(AlbumResponse.class);
+        AlbumResponse albumsDetails;
+        try {
+            albumsDetails = restClient.get()
+                    .uri(url)
+                    .header("Authorization", "Bearer " + getAccessToken())
+                    .retrieve()
+                    .body(AlbumResponse.class);
+        } catch (Exception ex) {
+            logger.error("Spotify API call failed for albums of bandId '{}': {}", spotifyId, ex.getMessage(), ex);
+            throw new ServiceException("Spotify API call error", ex);
+        }
 
         if (albumsDetails == null || albumsDetails.getItems().isEmpty()) {
             throw new ServiceException("Albums not found for band ID: " + spotifyId);
