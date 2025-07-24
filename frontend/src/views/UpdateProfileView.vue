@@ -23,7 +23,6 @@
 </template>
 
 <script>
-// Import your centralized axios instance with baseURL configured for Koyeb
 import api from '@/api.js';
 
 export default {
@@ -40,32 +39,28 @@ export default {
     };
   },
   created() {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    if (!this.$store.state.token) {
       this.$router.push('/login');
       return;
     }
 
-    api.get('/user', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(response => {
-      const { email, firstName, lastName } = response.data;
-      this.email = email;
-      this.firstName = firstName;
-      this.lastName = lastName;
-    })
-    .catch(error => {
-      console.error('Failed to load profile:', error);
-      localStorage.removeItem('token');
-      this.$router.push('/login');
-    });
+    api.get('/user')
+      .then(response => {
+        const { email, firstName, lastName } = response.data;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+      })
+      .catch(error => {
+        console.error('Failed to load profile:', error);
+        this.$store.commit('LOGOUT'); // clean logout
+        this.$router.push('/login');
+      });
   },
   methods: {
     async updateProfile() {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
+        if (!this.$store.state.token) {
           this.$router.push('/login');
           return;
         }
@@ -76,18 +71,13 @@ export default {
           email: this.email
         };
 
-        await api.put('/user', profileData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        await api.put('/user', profileData);
 
         this.status.message = 'Profile updated successfully.';
         this.status.type = 'success';
 
       } catch (err) {
-        console.error(err);
+        console.error('Failed to update profile:', err);
         if (err.response && err.response.data) {
           this.status.message = `Failed to update profile: ${err.response.data.message || 'Unknown error'}`;
         } else {

@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import api from '@/api.js'; // Import your Axios instance
+import api from '@/api.js';
 
 export default {
   data() {
@@ -23,29 +23,25 @@ export default {
     };
   },
   created() {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    if (!this.$store.state.token) {
       this.$router.push('/login');
       return;
     }
 
-    api.get('/user', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(response => {
-      this.profile = response.data;
-    })
-    .catch(error => {
-      console.error('Failed to fetch profile:', error);
-      localStorage.removeItem('token');
-      this.$router.push('/login');
-    });
+    api.get('/user')
+      .then(response => {
+        this.profile = response.data;
+      })
+      .catch(error => {
+        console.error('Failed to fetch profile:', error);
+        this.$store.commit('LOGOUT');
+        this.$router.push('/login');
+      });
   }
 }
 </script>
 
 <style scoped>
-/* your existing styles here */
 .profile-section {
   display: flex;
   flex-direction: column;
