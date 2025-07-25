@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import api from '@/api'; // <-- Use your configured Axios instance
+import api from '@/api'; // ✅ correct if api.js is in src/
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 
 export default {
@@ -133,6 +133,7 @@ export default {
   },
 };
 </script>
+
 
 
 
