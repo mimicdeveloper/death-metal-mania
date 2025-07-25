@@ -28,6 +28,7 @@
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-vue": "^7.20.0",
     "gh-pages": "^6.3.0",
+    "serve": "^14.2.4",
     "vite": "^3.2.7",
     "vue-eslint-parser": "^9.3.0"
   }
