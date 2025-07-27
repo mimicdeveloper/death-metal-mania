@@ -91,7 +91,7 @@ public class RestSpotifyService implements SpotifyService {
         List<SpotifyApi.Artist> filteredArtists = allArtists.stream()
                 .filter(artist -> {
                     String artistName = artist.getName() != null ? artist.getName().toLowerCase() : "";
-                    boolean isBannedBand = artistName.equals("chon") || artistName.equals("heavy//hitter");
+                    boolean isBannedBand = artistName.equals("chon") || artistName.equals("heavy//hitter") || artistName.equals("poppy");
                     boolean hasBlockedGenre = artist.getGenres() != null && artist.getGenres().stream().anyMatch(
                             genre -> {
                                 String lowerGenre = genre.toLowerCase();
