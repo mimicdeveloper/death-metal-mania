@@ -130,7 +130,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';  // import your configured api instance
 
 export default {
   data() {
@@ -222,7 +222,7 @@ export default {
     // --------------------
     async getAllUsers(clearStatus = true) {
       try {
-        const res = await axios.get('http://localhost:9000/admin/users', this.getAuthHeader());
+        const res = await api.get('/admin/users', this.getAuthHeader());
         this.usersListRaw = res.data;
         this.showUsersList = true;
         if (clearStatus) {
@@ -242,7 +242,7 @@ export default {
 
     async getUserById() {
       try {
-        const res = await axios.get(`http://localhost:9000/admin/users/${this.userIdInput}`, this.getAuthHeader());
+        const res = await api.get(`/admin/users/${this.userIdInput}`, this.getAuthHeader());
         const user = res.data;
         this.statusMessage.user = `User found: ${user.firstName} ${user.lastName}, Email: ${user.email}`;
       } catch (error) {
@@ -262,7 +262,7 @@ export default {
           lastName: this.updateLastName,
           email: this.updateEmail
         };
-        await axios.put(`http://localhost:9000/admin/users/${this.updateUserId}`, body, this.getAuthHeader());
+        await api.put(`/admin/users/${this.updateUserId}`, body, this.getAuthHeader());
         this.statusMessage.user = 'User updated successfully.';
 
         // Clear inputs
@@ -283,23 +283,22 @@ export default {
     },
 
     async deleteUserById(userId) {
-  try {
-    await axios.delete(`http://localhost:9000/admin/users/${userId}`, this.getAuthHeader());
-    this.statusMessage.user = `User ${userId} deleted.`;
-    this.getAllUsers(false); // Refresh list
-  } catch (err) {
-    this.statusMessage.user = `Failed to delete user ${userId}.`;
-    console.error('Delete user error:', err);
-  }
-},
-
+      try {
+        await api.delete(`/admin/users/${userId}`, this.getAuthHeader());
+        this.statusMessage.user = `User ${userId} deleted.`;
+        this.getAllUsers(false); // Refresh list
+      } catch (err) {
+        this.statusMessage.user = `Failed to delete user ${userId}.`;
+        console.error('Delete user error:', err);
+      }
+    },
 
     // --------------------
     // BAND METHODS
     // --------------------
     async getAllBands(clearStatus = true) {
       try {
-        const res = await axios.get('http://localhost:9000/bands', this.getAuthHeader());
+        const res = await api.get('/bands', this.getAuthHeader());
         this.bandsListRaw = res.data;
         this.showBandsList = true;
         if (clearStatus) {
@@ -324,7 +323,7 @@ export default {
           genre: this.bandGenre,
           country: this.bandCountry
         };
-        await axios.post('http://localhost:9000/admin/bands', body, this.getAuthHeader());
+        await api.post('/admin/bands', body, this.getAuthHeader());
         this.statusMessage.band = 'Band added successfully.';
 
         // Clear inputs
@@ -347,7 +346,7 @@ export default {
           genre: this.updateBandGenre,
           country: this.updateBandCountry
         };
-        await axios.put(`http://localhost:9000/admin/bands/${this.updateBandId}`, body, this.getAuthHeader());
+        await api.put(`/admin/bands/${this.updateBandId}`, body, this.getAuthHeader());
         this.statusMessage.band = 'Band updated successfully.';
 
         // Clear inputs
@@ -364,22 +363,22 @@ export default {
     },
 
     async deleteBandById(bandId) {
-  try {
-    await axios.delete(`http://localhost:9000/admin/bands/${bandId}`, this.getAuthHeader());
-    this.statusMessage.band = `Band ${bandId} deleted.`;
-    this.getAllBands(false); // Refresh list
-  } catch (err) {
-    this.statusMessage.band = `Failed to delete band ${bandId}.`;
-    console.error('Delete band error:', err);
-  }
-},
+      try {
+        await api.delete(`/admin/bands/${bandId}`, this.getAuthHeader());
+        this.statusMessage.band = `Band ${bandId} deleted.`;
+        this.getAllBands(false); // Refresh list
+      } catch (err) {
+        this.statusMessage.band = `Failed to delete band ${bandId}.`;
+        console.error('Delete band error:', err);
+      }
+    },
 
     // --------------------
     // EVENT METHODS
     // --------------------
     async getAllEvents(clearStatus = true) {
       try {
-        const res = await axios.get('http://localhost:9000/events', this.getAuthHeader());
+        const res = await api.get('/events', this.getAuthHeader());
         this.eventsListRaw = res.data;
         this.showEventsList = true;
         if (clearStatus) {
@@ -414,7 +413,7 @@ export default {
           maxPrice: this.addMaxPrice,
           info: this.addInfo
         };
-        await axios.post('http://localhost:9000/admin/events', body, this.getAuthHeader());
+        await api.post('/admin/events', body, this.getAuthHeader());
         this.statusMessage.event = 'Event added successfully.';
 
         // Clear inputs
@@ -447,7 +446,7 @@ export default {
           maxPrice: this.updateMaxPrice,
           info: this.updateInfo
         };
-        await axios.put(`http://localhost:9000/admin/events/${this.updateEventId}`, body, this.getAuthHeader());
+        await api.put(`/admin/events/${this.updateEventId}`, body, this.getAuthHeader());
         this.statusMessage.event = 'Event updated successfully.';
 
         // Clear inputs
@@ -469,18 +468,19 @@ export default {
     },
 
     async deleteEventById(eventId) {
-  try {
-    await axios.delete(`http://localhost:9000/admin/events/${eventId}`, this.getAuthHeader());
-    this.statusMessage.event = `Event ${eventId} deleted.`;
-    this.getAllEvents(false); // Refresh list
-  } catch (err) {
-    this.statusMessage.event = `Failed to delete event ${eventId}.`;
-    console.error('Delete event error:', err);
+      try {
+        await api.delete(`/admin/events/${eventId}`, this.getAuthHeader());
+        this.statusMessage.event = `Event ${eventId} deleted.`;
+        this.getAllEvents(false); // Refresh list
+      } catch (err) {
+        this.statusMessage.event = `Failed to delete event ${eventId}.`;
+        console.error('Delete event error:', err);
+      }
     }
   }
-}
 };
 </script>
+
 
 
   

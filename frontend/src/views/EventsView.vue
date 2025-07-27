@@ -25,96 +25,80 @@
   </template>
   
   <script>
-  import LoadingSpinner from '@/components/LoadingSpinner.vue';
-  import { mapState } from 'vuex';
-  
-  export default {
-    name: 'EventsView',
-    components: {
-      LoadingSpinner,
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import { mapState } from 'vuex';
+import api from '@/api'; // import your configured axios instance
+
+export default {
+  name: 'EventsView',
+  components: {
+    LoadingSpinner,
+  },
+  data() {
+    return {
+      favorites: [],
+      isLoading: false,
+    };
+  },
+  computed: {
+    ...mapState(['user', 'token']),
+  },
+  methods: {
+    formatTime(time24) {
+      if (!time24) return 'N/A';
+      const [hourStr, minuteStr] = time24.split(':');
+      let hour = parseInt(hourStr, 10);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      hour = hour % 12 || 12;
+      return `${hour}:${minuteStr} ${ampm}`;
     },
-    data() {
-      return {
-        favorites: [],
-        isLoading: false,
-      };
+    formatDate(dateStr) {
+      if (!dateStr) return 'N/A';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
     },
-    computed: {
-      ...mapState(['user', 'token']),
-    },
-    methods: {
-      formatTime(time24) {
-        if (!time24) return 'N/A';
-        const [hourStr, minuteStr] = time24.split(':');
-        let hour = parseInt(hourStr, 10);
-        const ampm = hour >= 12 ? 'PM' : 'AM';
-        hour = hour % 12 || 12;
-        return `${hour}:${minuteStr} ${ampm}`;
-      },
-      formatDate(dateStr) {
-        if (!dateStr) return 'N/A';
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
+    async fetchFavorites() {
+      this.isLoading = true;
+      try {
+        const response = await api.get('/favorites/events', {
+          headers: { Authorization: `Bearer ${this.token}` },
         });
-      },
-      async fetchFavorites() {
-        this.isLoading = true;
-        try {
-          const response = await fetch('http://localhost:9000/favorites/events', {
-            headers: {
-              Authorization: `Bearer ${this.token}`,
-            },
-          });
-  
-          if (!response.ok) {
-            throw new Error('Failed to fetch favorite events');
-          }
-  
-          const data = await response.json();
-          console.log('Favorites from backend:', data); // Helpful debug line
-          this.favorites = data;
-        } catch (error) {
-          console.error('Error fetching favorites:', error);
-          this.favorites = [];
-        } finally {
-          this.isLoading = false;
-        }
-      },
-      async deleteFavoriteEvent(eventId) {
-        if (!confirm('Are you sure you want to remove this event from your favorites?')) return;
-  
-        try {
-          const response = await fetch(`http://localhost:9000/favorites/events/${eventId}`, {
-            method: 'DELETE',
-            headers: {
-              Authorization: `Bearer ${this.token}`,
-            },
-          });
-  
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Delete error:', errorText);
-            alert('Failed to remove event from favorites.');
-            return;
-          }
-  
-          // Update the UI after successful deletion
-          this.favorites = this.favorites.filter(event => event.eventId !== eventId);
-          alert('Event removed from favorites!');
-        } catch (error) {
-          console.error('Network error during deletion:', error);
-          alert('Network error while removing event from favorites.');
-        }
-      },
+
+        this.favorites = response.data;
+        console.log('Favorites from backend:', this.favorites); // Helpful debug line
+      } catch (error) {
+        console.error('Error fetching favorites:', error);
+        this.favorites = [];
+      } finally {
+        this.isLoading = false;
+      }
     },
-    created() {
-      this.fetchFavorites();
+    async deleteFavoriteEvent(eventId) {
+      if (!confirm('Are you sure you want to remove this event from your favorites?')) return;
+
+      try {
+        await api.delete(`/favorites/events/${eventId}`, {
+          headers: { Authorization: `Bearer ${this.token}` },
+        });
+
+        this.favorites = this.favorites.filter(event => event.eventId !== eventId);
+        alert('Event removed from favorites!');
+      } catch (error) {
+        console.error('Error removing favorite event:', error);
+        alert('Failed to remove event from favorites.');
+      }
     },
-  };
-  </script>
+  },
+  created() {
+    this.fetchFavorites();
+  },
+};
+</script>
+
   
   <style scoped>
   #favorites-section {

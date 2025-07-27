@@ -1,5 +1,5 @@
 import { createStore as _createStore } from 'vuex';
-import axios from 'axios';
+import api from '@/api';  // import your api.js file with baseURL logic
 
 export function createStore(currentToken, currentUser) {
   let store = _createStore({
@@ -12,7 +12,7 @@ export function createStore(currentToken, currentUser) {
       SET_AUTH_TOKEN(state, token) {
         state.token = token;
         localStorage.setItem('token', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       },
       SET_USER(state, user) {
         state.user = user;
@@ -24,7 +24,7 @@ export function createStore(currentToken, currentUser) {
         state.token = '';
         state.user = {};
         state.favoriteEvents = [];
-        axios.defaults.headers.common = {};
+        delete api.defaults.headers.common['Authorization'];
       },
       SET_FAVORITE_EVENTS(state, events) {
         state.favoriteEvents = events;
@@ -37,12 +37,12 @@ export function createStore(currentToken, currentUser) {
       },
       REMOVE_FAVORITE_EVENT(state, eventId) {
         state.favoriteEvents = state.favoriteEvents.filter(e => e.id !== eventId);
-      }
+      },
     },
     actions: {
       async fetchFavoriteEvents({ commit, state }) {
         try {
-          const response = await axios.get('http://localhost:9000/favorites/events', {
+          const response = await api.get('/favorites/events', {
             headers: {
               Authorization: `Bearer ${state.token}`,
             },
@@ -55,8 +55,8 @@ export function createStore(currentToken, currentUser) {
       },
       async addFavoriteEvent({ commit, state }, event) {
         try {
-          await axios.post(
-            'http://localhost:9000/favorites/events',
+          await api.post(
+            '/favorites/events',
             {
               eventId: event.id,
               eventName: event.name,
@@ -83,7 +83,7 @@ export function createStore(currentToken, currentUser) {
       },
       async removeFavoriteEvent({ commit, state }, eventId) {
         try {
-          await axios.delete(`http://localhost:9000/favorites/events/${eventId}`, {
+          await api.delete(`/favorites/events/${eventId}`, {
             headers: {
               Authorization: `Bearer ${state.token}`,
             },
@@ -94,12 +94,12 @@ export function createStore(currentToken, currentUser) {
           console.error('Error removing favorite event:', error);
           return false;
         }
-      }
+      },
     },
   });
 
   if (currentToken) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${currentToken}`;
+    api.defaults.headers.common['Authorization'] = `Bearer ${currentToken}`;
   }
 
   return store;

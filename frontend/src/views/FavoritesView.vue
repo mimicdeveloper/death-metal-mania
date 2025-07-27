@@ -45,101 +45,105 @@
   </template>
   
   <script>
-  import axios from 'axios';
-  
-  export default {
-    name: 'FavoritesView',
-    data() {
-      return {
-        favorites: [],
-        bandId: '',
-        bandName: '',
-        rating: 1,
-        removeBandName: '',
-        addFavoriteMessage: '',
-        removeFavoriteMessage: ''
-      };
-    },
+import api from '@/api';
 
-    created() {
-    this.loadFavorites(); 
-    },
+export default {
+  name: 'FavoritesView',
+  data() {
+    return {
+      favorites: [],
+      bandId: '',
+      bandName: '',
+      rating: 1,
+      removeBandName: '',
+      addFavoriteMessage: '',
+      removeFavoriteMessage: '',
+    };
+  },
 
-    methods: {
-      async loadFavorites() {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          this.addFavoriteMessage = 'Please log in to view your favorites.';
-          return;
-        }
-  
-        try {
-          const response = await axios.get('http://localhost:9000/favorites/events', {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-          this.favorites = response.data;
-        } catch (error) {
-          console.error('Failed to load favorites:', error);
-        }
-      },
-      async addFavorite() {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          this.addFavoriteMessage = 'Please log in to add a favorite.';
-          return;
-        }
-  
-        try {
-          const response = await axios.post(
-            'http://localhost:9000/favorites',
-            {
-              bandId: this.bandId,
-              bandName: this.bandName,
-              rating: this.rating
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
-          );
-          this.addFavoriteMessage = 'Favorite added!';
-          this.bandId = '';
-          this.bandName = '';
-          this.rating = 1;
-          this.loadFavorites();
-        } catch (error) {
-          this.addFavoriteMessage = `Failed to add favorite: ${error.response ? error.response.data.message : error.message}`;
-        }
-      },
-      async removeFavorite() {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          this.removeFavoriteMessage = 'Please log in to remove a favorite.';
-          return;
-        }
-  
-        try {
-          const response = await axios.delete(
-            `http://localhost:9000/favorites/${encodeURIComponent(this.removeBandName)}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
-          );
-          this.removeFavoriteMessage = 'Favorite removed!';
-          this.removeBandName = '';
-          this.loadFavorites();
-        } catch (error) {
-          this.removeFavoriteMessage = `Failed to remove favorite: ${error.response ? error.response.data.message : error.message}`;
-        }
+  async created() {
+    await this.loadFavorites();
+  },
+
+  methods: {
+    async loadFavorites() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        this.addFavoriteMessage = 'Please log in to view your favorites.';
+        return;
       }
-    }
-  };
-  </script>
+
+      try {
+        const response = await api.get('/favorites/events', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        this.favorites = response.data;
+      } catch (error) {
+        console.error('Failed to load favorites:', error);
+      }
+    },
+
+    async addFavorite() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        this.addFavoriteMessage = 'Please log in to add a favorite.';
+        return;
+      }
+
+      try {
+        await api.post(
+          '/favorites',
+          {
+            bandId: this.bandId,
+            bandName: this.bandName,
+            rating: this.rating,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        this.addFavoriteMessage = 'Favorite added!';
+        this.bandId = '';
+        this.bandName = '';
+        this.rating = 1;
+        await this.loadFavorites();
+      } catch (error) {
+        this.addFavoriteMessage = `Failed to add favorite: ${
+          error.response ? error.response.data.message : error.message
+        }`;
+      }
+    },
+
+    async removeFavorite() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        this.removeFavoriteMessage = 'Please log in to remove a favorite.';
+        return;
+      }
+
+      try {
+        await api.delete(`/favorites/${encodeURIComponent(this.removeBandName)}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        this.removeFavoriteMessage = 'Favorite removed!';
+        this.removeBandName = '';
+        await this.loadFavorites();
+      } catch (error) {
+        this.removeFavoriteMessage = `Failed to remove favorite: ${
+          error.response ? error.response.data.message : error.message
+        }`;
+      }
+    },
+  },
+};
+</script>
+
   
   <style scoped>
   #favoritesSection,

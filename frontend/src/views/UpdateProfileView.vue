@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
 
 export default {
   name: 'UpdateProfileView',
@@ -38,49 +38,46 @@ export default {
       }
     };
   },
-  created() {
+  async created() {
     const token = localStorage.getItem('token');
     if (!token) {
       this.$router.push('/login');
       return;
     }
 
-    axios.get('http://localhost:9000/user', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(response => {
+    try {
+      const response = await api.get('/user', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const { email, firstName, lastName } = response.data;
       this.email = email;
       this.firstName = firstName;
       this.lastName = lastName;
-    })
-    .catch(error => {
+    } catch (error) {
       console.error('Failed to load profile:', error);
       localStorage.removeItem('token');
       this.$router.push('/login');
-    });
+    }
   },
   methods: {
     async updateProfile() {
       try {
-        const token = this.$store.state.token;
-
+        const token = this.$store.state.token || localStorage.getItem('token');
         const profileData = {
           firstName: this.firstName,
           lastName: this.lastName,
-          email: this.email
+          email: this.email,
         };
 
-        await axios.put('http://localhost:9000/user', profileData, {
+        await api.put('/user', profileData, {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         });
 
         this.status.message = 'Profile updated successfully.';
         this.status.type = 'success';
-
       } catch (err) {
         console.error(err);
         if (err.response && err.response.data) {
@@ -94,6 +91,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 #updateProfileSection {

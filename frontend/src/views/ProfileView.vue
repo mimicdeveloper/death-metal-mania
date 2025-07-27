@@ -14,35 +14,35 @@
   </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
 
 export default {
   data() {
     return {
-      profile: null
+      profile: null,
     };
   },
-  created() {
+  async created() {
     const token = localStorage.getItem('token');
     if (!token) {
       this.$router.push('/login');
       return;
     }
 
-    axios.get('http://localhost:9000/user', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(response => {
-        this.profile = response.data;
-      })
-      .catch(error => {
-        console.error('Failed to fetch profile:', error);
-        localStorage.removeItem('token');
-        this.$router.push('/login');
+    try {
+      const response = await api.get('/user', {
+        headers: { Authorization: `Bearer ${token}` },
       });
-  }
-}
+      this.profile = response.data;
+    } catch (error) {
+      console.error('Failed to fetch profile:', error);
+      localStorage.removeItem('token');
+      this.$router.push('/login');
+    }
+  },
+};
 </script>
+
 
 
 <style scoped>
