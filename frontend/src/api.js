@@ -7,4 +7,6 @@ const api = axios.create({
       : 'https://tragic-greta-mimicdev-d365cdd2.koyeb.app',
 });
 
+console.log("Using API base URL:", api.defaults.baseURL);
+
 export default api;
