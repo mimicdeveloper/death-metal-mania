@@ -1,7 +1,10 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_REMOTE_API || 'http://localhost:9000',
+  baseURL:
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:9000'
+      : 'https://tragic-greta-mimicdev-d365cdd2.koyeb.app',
 });
 
 export default api;
