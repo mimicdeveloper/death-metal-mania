@@ -5,6 +5,7 @@ import com.deathmetalmania.model.Favorite;
 import com.deathmetalmania.model.dto.FavoriteEventDto;
 import com.deathmetalmania.model.dto.UserFavoriteDto;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -28,16 +29,39 @@ public class JdbcUserFavoriteDao implements UserFavoriteDao {
     // Band favorites use User_favorites table
     @Override
     public void addFavoriteByBandName(int userId, UserFavoriteDto userFavoriteDto) {
-        String insertSql = "INSERT INTO User_favorites (user_id, band_id, band_name, rating) " +
-                "VALUES (?, ?, ?, ?)";
         try {
-            jdbcTemplate.update(insertSql, userId, userFavoriteDto.getBandId(), userFavoriteDto.getBandName(), userFavoriteDto.getRating());
+            // Step 1: Try to get band_id from the band name
+            String selectBandIdSql = "SELECT band_id FROM bands WHERE name = ?";
+            Integer bandId = null;
+            try {
+                bandId = jdbcTemplate.queryForObject(selectBandIdSql, Integer.class, userFavoriteDto.getBandName());
+            } catch (EmptyResultDataAccessException e) {
+                // Band not found – insert it with default values
+                String insertBandSql = "INSERT INTO bands (name, genre, country) VALUES (?, ?, ?) RETURNING band_id";
+                bandId = jdbcTemplate.queryForObject(insertBandSql,
+                        Integer.class,
+                        userFavoriteDto.getBandName(),
+                        "Death Metal",    // default genre
+                        "Unknown");       // default country
+            }
+
+            // Step 2: Now insert into user_favorites using the bandId
+            String insertFavoriteSql = "INSERT INTO user_favorites (user_id, band_id, band_name, rating) VALUES (?, ?, ?, ?)";
+            jdbcTemplate.update(insertFavoriteSql,
+                    userId,
+                    bandId,
+                    userFavoriteDto.getBandName(),
+                    userFavoriteDto.getRating());
+
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Unable to connect to server or database while adding favorite", e);
         } catch (DataIntegrityViolationException e) {
             throw new DaoException("Data integrity violation while adding favorite", e);
+        } catch (Exception e) {
+            throw new DaoException("Error adding favorite band for user ID: " + userId, e);
         }
     }
+
 
     @Override
     public List<Favorite> getFavoritesByUserId(int userId) {
@@ -74,7 +98,7 @@ public class JdbcUserFavoriteDao implements UserFavoriteDao {
     @Override
     public void addFavoriteEvent(int userId, FavoriteEventDto event) {
         String sql = """
-            INSERT INTO User_favorite_events
+            INSERT INTO user_favorite_events
             (user_id, event_id, event_name, local_date, local_time, city, state, venue, url, info)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;

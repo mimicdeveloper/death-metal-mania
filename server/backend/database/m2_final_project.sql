@@ -127,7 +127,7 @@ INSERT INTO Albums (band_id, spotify_id, title) VALUES
 INSERT INTO Events (band_id, name, date, venue, city, country_code, min_price, max_price) VALUES
     (2, 'Maryland Deathfest',     '2025-11-12', 'Ram''s Head',          'Baltimore',  'US', 55, 55),
     (3, 'Killtown Deathfest',     '2025-09-21', 'Newport Music Hall',  'Copenhagen', 'DK', 40, 40),
-    (1, 'Fire in the Mountains',  '2025-07-23', 'King of Clubs',       'Kyoto',      'JP', 35, 35);
+    (1, 'Fire in the Mountains',  '2025-12-23', 'King of Clubs',       'Kyoto',      'JP', 35, 35);
 
 -- User Favorites
 INSERT INTO User_favorites (user_id, band_id, rating, band_name) VALUES
