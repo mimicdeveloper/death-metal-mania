@@ -101,16 +101,17 @@ export default {
       }
 
       const favoriteEvent = {
-        eventId: event.id,
-        name: event.name,
-        localDate: event.dates?.start?.localDate || '',
-        localTime: event.dates?.start?.localTime || '',
-        city: event._embedded?.venues?.[0]?.city?.name || '',
-        state: event._embedded?.venues?.[0]?.state?.name || '',
-        venue: event._embedded?.venues?.[0]?.name || '',
-        url: event.url,
-        info: event.info || '',
-      };
+  eventId: event.id,
+  eventName: event.name,
+  localDate: event.dates?.start?.localDate || '',
+  localTime: event.dates?.start?.localTime || '',
+  city: event._embedded?.venues?.[0]?.city?.name || '',
+  state: event._embedded?.venues?.[0]?.state?.name || '',
+  venue: event._embedded?.venues?.[0]?.name || '',
+  url: event.url,
+  info: event.info || '',
+};
+
 
       try {
         const response = await api.post('/favorites/events', favoriteEvent, {
