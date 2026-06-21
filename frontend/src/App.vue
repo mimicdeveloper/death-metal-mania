@@ -29,7 +29,7 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #000;
+  background-color: #0a0a0a;
   color: #fff;
   font-family: 'Arial', sans-serif;
 }

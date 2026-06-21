@@ -25,7 +25,7 @@ export default {
 
 <style scoped>
 .home-container {
-  background-color: #000000;
+  background-color: #0a0a0a;
   color: #ffffff;
   min-height: 100vh;
   font-family: 'Arial', sans-serif;

@@ -5,7 +5,7 @@
     <div class="search-controls">
       <button class="btn-primary" @click="searchByGenre" :disabled="isLoading">
         <span v-if="isLoading">Loading...</span>
-        <span v-else>Show Bands</span>
+        <span v-else>Show Death Metal Bands</span>
       </button>
 
       <div class="search-input-group">
@@ -430,21 +430,19 @@ input::placeholder {
 
 .band-card {
   background: #111;
-  border: 1px solid #2a2a2a;
+  border: none;
   border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  transition: transform 0.15s, box-shadow 0.2s;
 }
 
 .band-card:hover {
-  border-color: #550000;
   transform: translateY(-2px);
   box-shadow: 0 4px 20px rgba(220, 20, 60, 0.15);
 }
 
 .band-card.expanded {
-  border-color: crimson;
   box-shadow: 0 0 20px rgba(220, 20, 60, 0.25);
 }
 
@@ -568,7 +566,7 @@ input::placeholder {
   display: flex;
   gap: 1.5rem;
   background: #111;
-  border: 1px solid #2a2a2a;
+  border: none;
   border-radius: 10px;
   padding: 1.25rem;
   align-items: flex-start;
