@@ -23,11 +23,11 @@
         <button class="genre-chip" :class="{ active: activeGenres.length === 0 }" @click="activeGenres = []">All</button>
         <button
           v-for="genre in allGenres"
-          :key="genre"
+          :key="genre.label"
           class="genre-chip"
-          :class="{ active: activeGenres.includes(genre) }"
+          :class="{ active: activeGenres.some(g => g.label === genre.label) }"
           @click="toggleGenre(genre)"
-        >{{ genre }}</button>
+        >{{ genre.label }}</button>
       </div>
     </div>
 
@@ -169,7 +169,9 @@ export default {
     displayedBands() {
       if (this.activeGenres.length === 0) return this.genreResults;
       return this.genreResults.filter(band =>
-        band.genres && band.genres.some(g => this.activeGenres.includes(g))
+        band.genres && this.activeGenres.some(active =>
+          band.genres.some(bg => bg.toLowerCase().includes(active.match))
+        )
       );
     },
   },
@@ -252,16 +254,30 @@ export default {
     },
 
     buildGenreList() {
-      const set = new Set();
-      this.genreResults.forEach(band => {
-        if (band.genres) band.genres.forEach(g => set.add(g));
-      });
-      this.allGenres = [...set].sort();
+      // Fixed list of approved death metal subgenres with their match keywords
+      const approved = [
+        { label: 'Death Metal',          match: 'death metal' },
+        { label: 'Slam',                 match: 'slam' },
+        { label: 'Brutal Death Metal',   match: 'brutal death' },
+        { label: 'Hardcore Death Metal', match: 'hardcore death' },
+        { label: 'Cavernous Death Metal',match: 'cavernous' },
+        { label: 'Blackened Death Metal',match: 'blackened death' },
+        { label: 'Death & Roll',         match: 'death and roll' },
+        { label: 'Swedish Death Metal',  match: 'swedish death' },
+        { label: 'Finnish Death Metal',  match: 'finnish death' },
+        { label: 'Old School Death Metal', match: 'old school death' },
+      ];
+      // Only show a chip if at least one loaded band has that subgenre
+      this.allGenres = approved.filter(g =>
+        this.genreResults.some(band =>
+          band.genres && band.genres.some(bg => bg.toLowerCase().includes(g.match))
+        )
+      );
       this.activeGenres = [];
     },
 
     toggleGenre(genre) {
-      const idx = this.activeGenres.indexOf(genre);
+      const idx = this.activeGenres.findIndex(g => g.label === genre.label);
       if (idx === -1) this.activeGenres.push(genre);
       else this.activeGenres.splice(idx, 1);
     },
