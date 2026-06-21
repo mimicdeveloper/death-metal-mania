@@ -10,6 +10,9 @@
       <input type="text" v-model="bandName" placeholder="Search by band name..." @keyup.enter="searchBand" />
       <button class="btn-primary" @click="searchBand" :disabled="isLoading">Search</button>
       <button class="btn-ghost" @click="clearResults" v-if="genreResults.length > 0">Clear</button>
+      <button class="btn-sort" v-if="genreResults.length > 0" @click="cycleSort">
+        {{ sortMode === 'none' ? 'Sort A–Z' : sortMode === 'asc' ? 'Sort Z–A' : 'Sort: Off' }}
+      </button>
     </div>
 
     <!-- Subgenre filter chips — only after a genre load -->
@@ -154,6 +157,7 @@ export default {
       allGenres: [],
       activeGenres: [],
       bandsLoaded: false,
+      sortMode: 'none',
       currentPage: 1,
       expandedBandId: null,
       expandedAlbumId: null,
@@ -163,12 +167,16 @@ export default {
   },
   computed: {
     displayedBands() {
-      if (this.activeGenres.length === 0) return this.genreResults;
-      return this.genreResults.filter(band =>
-        band.genres && this.activeGenres.some(active =>
-          band.genres.some(bg => bg.toLowerCase().includes(active.match))
-        )
-      );
+      let bands = this.activeGenres.length === 0
+        ? this.genreResults
+        : this.genreResults.filter(band =>
+            band.genres && this.activeGenres.some(active =>
+              band.genres.some(bg => bg.toLowerCase().includes(active.match))
+            )
+          );
+      if (this.sortMode === 'asc') return [...bands].sort((a, b) => a.name.localeCompare(b.name));
+      if (this.sortMode === 'desc') return [...bands].sort((a, b) => b.name.localeCompare(a.name));
+      return bands;
     },
     totalPages() {
       return Math.ceil(this.displayedBands.length / PAGE_SIZE);
@@ -186,6 +194,12 @@ export default {
     },
   },
   methods: {
+    cycleSort() {
+      const modes = ['none', 'asc', 'desc'];
+      this.sortMode = modes[(modes.indexOf(this.sortMode) + 1) % modes.length];
+      this.currentPage = 1;
+    },
+
     async loadDeathMetal() {
       this.isLoading = true;
       this.expandedBandId = null;
@@ -312,6 +326,7 @@ export default {
       this.activeGenres = [];
       this.searched = false;
       this.bandsLoaded = false;
+      this.sortMode = 'none';
       this.expandedBandId = null;
       this.expandedAlbumId = null;
       this.currentPage = 1;
@@ -408,6 +423,22 @@ input::placeholder { color: #444; }
 }
 
 .btn-ghost:hover { color: #aaa; border-color: #444; }
+
+.btn-sort {
+  padding: 0.6rem 1rem;
+  background: transparent;
+  color: #666;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+.btn-sort:hover { color: #fff; border-color: #555; }
 
 /* Filter bar */
 .filter-bar {
