@@ -87,25 +87,31 @@ public class RestSpotifyService implements SpotifyService {
             throw new ServiceException("No artists found using fallback query.");
         }
 
-        // Allowlist: keep only bands with approved death metal subgenres.
+        // Keep only approved death metal subgenres; explicitly block deathcore and metalcore.
         List<SpotifyApi.Artist> filteredArtists = allArtists.stream()
                 .filter(artist -> {
                     if (artist.getGenres() == null || artist.getGenres().isEmpty()) {
                         return false;
                     }
-                    return artist.getGenres().stream().anyMatch(genre -> {
-                        String g = genre.toLowerCase();
-                        return g.contains("death metal") ||
-                               g.contains("slam") ||
-                               g.contains("brutal") ||
-                               g.contains("death doom") ||
-                               g.contains("cavernous") ||
-                               g.contains("blackened death") ||
-                               g.contains("death and roll") ||
-                               g.contains("swedish death") ||
-                               g.contains("finnish death") ||
-                               g.contains("old school death");
-                    });
+                    List<String> genres = artist.getGenres().stream()
+                            .map(String::toLowerCase)
+                            .collect(Collectors.toList());
+                    boolean hasBlockedGenre = genres.stream().anyMatch(g ->
+                            g.contains("deathcore") || g.contains("metalcore") || g.contains("hardcore punk")
+                    );
+                    if (hasBlockedGenre) return false;
+                    return genres.stream().anyMatch(g ->
+                            g.contains("death metal") ||
+                            g.contains("slam") ||
+                            g.contains("brutal death") ||
+                            g.contains("death doom") ||
+                            g.contains("cavernous") ||
+                            g.contains("blackened death") ||
+                            g.contains("death and roll") ||
+                            g.contains("swedish death") ||
+                            g.contains("finnish death") ||
+                            g.contains("old school death")
+                    );
                 })
                 .collect(Collectors.toList());
 
