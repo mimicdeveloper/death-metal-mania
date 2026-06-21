@@ -5,7 +5,6 @@
     <!-- ========== USERS ========== -->
     <section class="admin-users-section">
       <h2>Manage Users</h2>
-      <p class="status-message" v-if="statusMessage.user">{{ statusMessage.user }}</p>
       <div class="button-group">
         <button class="get-all" @click="getAllUsers">Get All Users</button>
         <button v-on:click="clearUsers" class="clear-button">Clear</button>
@@ -39,7 +38,6 @@
     <!-- ========== BANDS ========== -->
     <section class="admin-bands-section">
       <h2>Manage Bands</h2>
-      <p class="status-message" v-if="statusMessage.band">{{ statusMessage.band }}</p>
       <div class="button-group">
         <button class="get-all" @click="getAllBands">Get All Bands</button>
         <button v-on:click="clearBands" class="clear-button">Clear</button>
@@ -78,7 +76,6 @@
     <!-- ========== EVENTS ========== -->
     <section class="admin-events-section">
       <h2>Manage Events</h2>
-      <p class="status-message" v-if="statusMessage.event">{{ statusMessage.event }}</p>
       <div class="button-group">
         <button class="get-all" @click="getAllEvents">Get All Events</button>
         <button v-on:click="clearEvents" class="clear-button">Clear</button>
@@ -130,9 +127,14 @@
 </template>
 
 <script>
-import api from '@/api';  // import your configured api instance
+import api from '@/api';
+import { useToast } from 'vue-toastification';
 
 export default {
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
   data() {
     return {
       // Raw reactive lists from backend, these hold actual data
@@ -145,12 +147,7 @@ export default {
       showBandsList: false,
       showEventsList: false,
 
-      // Status messages for each section
-      statusMessage: {
-        user: '',
-        band: '',
-        event: ''
-      },
+      statusMessage: { user: '', band: '', event: '' },
 
       // User input fields
       userIdInput: '',
@@ -226,10 +223,10 @@ export default {
         this.usersListRaw = res.data;
         this.showUsersList = true;
         if (clearStatus) {
-          this.statusMessage.user = 'Users loaded successfully.';
+          this.toast.success('Users loaded successfully.');
         }
       } catch (err) {
-        this.statusMessage.user = 'Failed to load users.';
+        this.toast.error('Failed to load users.');
         console.error('Error fetching users:', err);
       }
     },
@@ -237,20 +234,19 @@ export default {
     clearUsers() {
       this.usersListRaw = [];
       this.showUsersList = false;
-      this.statusMessage.user = '';
     },
 
     async getUserById() {
       try {
         const res = await api.get(`/admin/users/${this.userIdInput}`, this.getAuthHeader());
         const user = res.data;
-        this.statusMessage.user = `User found: ${user.firstName} ${user.lastName}, Email: ${user.email}`;
+        this.toast.success(`User found: ${user.firstName} ${user.lastName}, Email: ${user.email}`);
       } catch (error) {
         console.error(error);
         if (error.response && error.response.status === 404) {
-          this.statusMessage.user = 'User not found.';
+          this.toast.error('User not found.');
         } else {
-          this.statusMessage.user = 'An error occurred.';
+          this.toast.error('An error occurred.');
         }
       }
     },
@@ -263,21 +259,20 @@ export default {
           email: this.updateEmail
         };
         await api.put(`/admin/users/${this.updateUserId}`, body, this.getAuthHeader());
-        this.statusMessage.user = 'User updated successfully.';
+        this.toast.success('User updated successfully.');
 
-        // Clear inputs
         this.updateUserId = '';
         this.updateFirstName = '';
         this.updateLastName = '';
         this.updateEmail = '';
 
-        await this.getAllUsers(false); // prevent overwriting status message
+        await this.getAllUsers(false);
       } catch (error) {
         console.error(error);
         if (error.response && error.response.status === 404) {
-          this.statusMessage.user = 'User not found.';
+          this.toast.error('User not found.');
         } else {
-          this.statusMessage.user = 'Failed to update user.';
+          this.toast.error('Failed to update user.');
         }
       }
     },
@@ -285,10 +280,10 @@ export default {
     async deleteUserById(userId) {
       try {
         await api.delete(`/admin/users/${userId}`, this.getAuthHeader());
-        this.statusMessage.user = `User ${userId} deleted.`;
-        this.getAllUsers(false); // Refresh list
+        this.toast.success(`User ${userId} deleted.`);
+        this.getAllUsers(false);
       } catch (err) {
-        this.statusMessage.user = `Failed to delete user ${userId}.`;
+        this.toast.error(`Failed to delete user ${userId}.`);
         console.error('Delete user error:', err);
       }
     },
@@ -302,17 +297,16 @@ export default {
         this.bandsListRaw = res.data;
         this.showBandsList = true;
         if (clearStatus) {
-          this.statusMessage.band = 'Bands loaded successfully.';
+          this.toast.success('Bands loaded successfully.');
         }
       } catch {
-        this.statusMessage.band = 'Failed to load bands.';
+        this.toast.error('Failed to load bands.');
       }
     },
 
     clearBands() {
       this.bandsListRaw = [];
       this.showBandsList = false;
-      this.statusMessage.band = '';
     },
 
     async addBand() {
@@ -324,17 +318,16 @@ export default {
           country: this.bandCountry
         };
         await api.post('/admin/bands', body, this.getAuthHeader());
-        this.statusMessage.band = 'Band added successfully.';
+        this.toast.success('Band added successfully.');
 
-        // Clear inputs
         this.bandSpotifyId = '';
         this.bandName = '';
         this.bandGenre = '';
         this.bandCountry = '';
 
-        await this.getAllBands(false); // prevent overwriting status message
+        await this.getAllBands(false);
       } catch {
-        this.statusMessage.band = 'Failed to add band.';
+        this.toast.error('Failed to add band.');
       }
     },
 
@@ -347,28 +340,27 @@ export default {
           country: this.updateBandCountry
         };
         await api.put(`/admin/bands/${this.updateBandId}`, body, this.getAuthHeader());
-        this.statusMessage.band = 'Band updated successfully.';
+        this.toast.success('Band updated successfully.');
 
-        // Clear inputs
         this.updateBandId = '';
         this.updateBandSpotifyId = '';
         this.updateBandName = '';
         this.updateBandGenre = '';
         this.updateBandCountry = '';
 
-        await this.getAllBands(false); // prevent overwriting status message
+        await this.getAllBands(false);
       } catch {
-        this.statusMessage.band = 'Failed to update band.';
+        this.toast.error('Failed to update band.');
       }
     },
 
     async deleteBandById(bandId) {
       try {
         await api.delete(`/admin/bands/${bandId}`, this.getAuthHeader());
-        this.statusMessage.band = `Band ${bandId} deleted.`;
-        this.getAllBands(false); // Refresh list
+        this.toast.success(`Band ${bandId} deleted.`);
+        this.getAllBands(false);
       } catch (err) {
-        this.statusMessage.band = `Failed to delete band ${bandId}.`;
+        this.toast.error(`Failed to delete band ${bandId}.`);
         console.error('Delete band error:', err);
       }
     },
@@ -382,17 +374,16 @@ export default {
         this.eventsListRaw = res.data;
         this.showEventsList = true;
         if (clearStatus) {
-          this.statusMessage.event = 'Events loaded successfully.';
+          this.toast.success('Events loaded successfully.');
         }
       } catch {
-        this.statusMessage.event = 'Failed to load events.';
+        this.toast.error('Failed to load events.');
       }
     },
 
     clearEvents() {
       this.eventsListRaw = [];
       this.showEventsList = false;
-      this.statusMessage.event = '';
     },
 
     formatDate(date) {
@@ -414,9 +405,8 @@ export default {
           info: this.addInfo
         };
         await api.post('/admin/events', body, this.getAuthHeader());
-        this.statusMessage.event = 'Event added successfully.';
+        this.toast.success('Event added successfully.');
 
-        // Clear inputs
         this.addBandId = '';
         this.addEventName = '';
         this.addEventDate = '';
@@ -427,9 +417,9 @@ export default {
         this.addMaxPrice = '';
         this.addInfo = '';
 
-        await this.getAllEvents(false); // prevent overwriting status message
+        await this.getAllEvents(false);
       } catch {
-        this.statusMessage.event = 'Failed to add event.';
+        this.toast.error('Failed to add event.');
       }
     },
 
@@ -447,9 +437,8 @@ export default {
           info: this.updateInfo
         };
         await api.put(`/admin/events/${this.updateEventId}`, body, this.getAuthHeader());
-        this.statusMessage.event = 'Event updated successfully.';
+        this.toast.success('Event updated successfully.');
 
-        // Clear inputs
         this.updateEventId = '';
         this.updateBandId = '';
         this.updateEventName = '';
@@ -461,19 +450,19 @@ export default {
         this.updateMaxPrice = '';
         this.updateInfo = '';
 
-        await this.getAllEvents(false); // prevent overwriting status message
+        await this.getAllEvents(false);
       } catch {
-        this.statusMessage.event = 'Failed to update event.';
+        this.toast.error('Failed to update event.');
       }
     },
 
     async deleteEventById(eventId) {
       try {
         await api.delete(`/admin/events/${eventId}`, this.getAuthHeader());
-        this.statusMessage.event = `Event ${eventId} deleted.`;
-        this.getAllEvents(false); // Refresh list
+        this.toast.success(`Event ${eventId} deleted.`);
+        this.getAllEvents(false);
       } catch (err) {
-        this.statusMessage.event = `Failed to delete event ${eventId}.`;
+        this.toast.error(`Failed to delete event ${eventId}.`);
         console.error('Delete event error:', err);
       }
     }

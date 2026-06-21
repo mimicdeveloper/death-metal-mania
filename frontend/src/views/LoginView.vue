@@ -4,7 +4,7 @@
       <h2>Login</h2>
       <form id="login-form" @submit.prevent="login">
         <div class="input-group">
-          <label for="loginUsername">Username:</label>
+          <label for="loginUsername">Username</label>
           <input
             type="text"
             id="loginUsername"
@@ -16,7 +16,7 @@
         </div>
 
         <div class="input-group">
-          <label for="loginPassword">Password:</label>
+          <label for="loginPassword">Password</label>
           <input
             type="password"
             id="loginPassword"
@@ -25,11 +25,6 @@
             required
             placeholder="Enter password"
           />
-        </div>
-
-        <!-- Status message -->
-        <div v-if="status.message" :class="['status-message', status.type]">
-          {{ status.message }}
         </div>
 
         <button type="submit">Login</button>
@@ -46,52 +41,43 @@
 
 <script>
 import authService from "../services/AuthService";
+import { useToast } from "vue-toastification";
 
 export default {
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
   data() {
     return {
       user: {
         username: "",
         password: "",
       },
-      status: {
-        message: "",
-        type: "", // "success" or "error"
-      },
     };
   },
   methods: {
-    error(msg) {
-      this.status.message = msg;
-      this.status.type = "error";
-    },
-    success(msg) {
-      this.status.message = msg;
-      this.status.type = "success";
-    },
     login() {
-      this.status.message = ""; // clear previous status
-
       authService
         .login(this.user)
         .then((response) => {
           if (response.status === 200) {
-            this.success("Successfully logged in!");
+            this.toast.success("Successfully logged in!");
             this.$store.commit("SET_AUTH_TOKEN", response.data.token);
             this.$store.commit("SET_USER", response.data.user);
             setTimeout(() => {
               this.$router.push("/");
-            }, 3000); // delay redirect so user sees message
+            }, 1000);
           }
         })
         .catch((error) => {
           const response = error.response;
           if (!response) {
-            this.error("Network error. Please try again.");
+            this.toast.error("Network error. Please try again.");
           } else if (response.status === 401) {
-            this.error("Invalid username or password!");
+            this.toast.error("Invalid username or password!");
           } else {
-            this.error(response.data?.message || "Login failed.");
+            this.toast.error(response.data?.message || "Login failed.");
           }
         });
     },
@@ -101,11 +87,12 @@ export default {
 
 <style scoped>
 #login-section {
-  max-width: 600px;
+  max-width: 480px;
   margin: 3rem auto;
-  background-color: #222;
-  padding: 2rem;
-  border-radius: 10px;
+  background-color: #111;
+  padding: 2.5rem;
+  border-radius: 12px;
+  border: 1px solid #2a2a2a;
   color: white;
 }
 
@@ -113,87 +100,92 @@ h2 {
   text-align: center;
   font-size: 1.8rem;
   margin-bottom: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
+  gap: 0.4rem;
 }
 
 label {
-  margin-bottom: 0.5rem;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 input {
   padding: 0.75rem 1rem;
-  font-size: 1.1rem;
-  border: 1px solid #444;
+  font-size: 1rem;
+  border: 1px solid #333;
   border-radius: 6px;
-  background-color: #727272;
+  background-color: #1c1c1c;
   color: white;
+  transition: border-color 0.2s;
+}
+
+input:focus {
+  outline: none;
+  border-color: crimson;
 }
 
 input::placeholder {
-  color: rgb(220, 220, 220);
+  color: #555;
 }
 
 button {
   align-self: center;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 2rem;
   background-color: crimson;
   color: white;
   border: none;
   border-radius: 6px;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
 button:hover {
-  background-color: rgb(132, 12, 36);
+  background-color: #a30000;
+}
+
+button:active {
+  transform: scale(0.97);
 }
 
 hr {
-  margin: 2rem 0 1rem 0;
+  margin: 1.5rem 0 1rem;
   border: none;
-  border-top: 1px solid #555;
+  border-top: 1px solid #2a2a2a;
 }
 
 .register-link {
   text-align: center;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  color: #888;
 }
 
 .register-link a {
   color: crimson;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.register-link a:hover {
   text-decoration: underline;
-  font-weight: bold;
-}
-
-/* Status messages */
-.status-message {
-  margin-bottom: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 1.1rem;
-  text-align: center;
-}
-
-.status-message.success {
-  background-color: #4caf50; /* green */
-  color: white;
-}
-
-.status-message.error {
-  background-color: #f44336; /* red */
-  color: white;
 }
 </style>

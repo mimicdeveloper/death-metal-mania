@@ -1,278 +1,639 @@
 <template>
   <section id="search-section">
-    <h2>Search Death Metal Bands and Albums</h2>
+    <h2 class="section-title">Death Metal Bands</h2>
+
     <div class="search-controls">
-      <button @click="searchByGenre">Show Death Metal Bands</button>
+      <button class="btn-primary" @click="searchByGenre" :disabled="isLoading">
+        <span v-if="isLoading">Loading...</span>
+        <span v-else>Show Bands</span>
+      </button>
 
       <div class="search-input-group">
-        <input type="text" v-model="bandName" placeholder="Search by Band Name..." />
-        <button @click="searchBand">Search Band</button>
+        <input type="text" v-model="bandName" placeholder="Search by band name..." @keyup.enter="searchBand" />
+        <button class="btn-primary" @click="searchBand" :disabled="isLoading">Search</button>
       </div>
 
-      <button @click="clearResults">Clear</button>
+      <div class="search-input-group">
+        <input type="text" v-model="spotifyId" placeholder="Spotify ID for albums..." @keyup.enter="searchAlbums" />
+        <button class="btn-secondary" @click="searchAlbums" :disabled="isLoading">Albums</button>
+      </div>
+
+      <button class="btn-ghost" @click="clearResults" v-if="results.length > 0 || genreResults.length > 0">Clear</button>
     </div>
 
-    <div class="search-input-group" style="margin-bottom: 1rem;">
-      <input type="text" v-model="spotifyId" placeholder="Enter Spotify ID to Get Albums..." />
-      <button @click="searchAlbums">Search Albums</button>
+    <!-- Genre filter bar — only shown when browsing by genre -->
+    <div class="genre-filter-bar" v-if="allGenres.length > 0">
+      <span class="filter-label">Filter:</span>
+      <div class="genre-chips">
+        <button
+          class="genre-chip"
+          :class="{ active: activeGenres.length === 0 }"
+          @click="activeGenres = []"
+        >All</button>
+        <button
+          v-for="genre in allGenres"
+          :key="genre"
+          class="genre-chip"
+          :class="{ active: activeGenres.includes(genre) }"
+          @click="toggleGenre(genre)"
+        >{{ genre }}</button>
+      </div>
     </div>
 
-    <!-- Loading Spinner -->
     <loading-spinner :spin="isLoading" id="spinner" />
 
-    <div id="search-results">
-      <div v-if="results.length === 0 && searched && !isLoading">No results found.</div>
-      <div v-for="(item, index) in results" :key="index" class="band">
-        <h3>{{ item.name }}</h3>
-        <p><strong>ID:</strong> {{ item.id }}</p>
-
-        <!-- Album display -->
-        <div v-if="item.images && item.images.length > 0">
-          <img :src="item.images[0].url" :alt="item.name + ' album cover'" class="album-cover" />
-          <p v-if="item.release_date"><strong>Release Date:</strong> {{ item.release_date }}</p>
-          <iframe
-            v-if="item.id"
-            :src="`https://open.spotify.com/embed/album/${item.id}`"
-            width="300"
-            height="250"
-            allowtransparency="true"
-            allow="encrypted-media"
-            class="spotify-player spotify-album"
-          ></iframe>
+    <!-- Band grid results -->
+    <div v-if="displayedBands.length > 0" class="band-grid">
+      <div
+        v-for="(band, index) in displayedBands"
+        :key="index"
+        class="band-card"
+        @click="toggleExpand(index)"
+        :class="{ expanded: expandedIndex === index }"
+      >
+        <div class="band-card-inner">
+          <div class="band-image-wrap">
+            <img
+              v-if="band.images && band.images.length > 0"
+              :src="band.images[0].url"
+              :alt="band.name"
+              class="band-image"
+            />
+            <div v-else class="band-image-placeholder">
+              <span>🤘</span>
+            </div>
+          </div>
+          <div class="band-info">
+            <h3 class="band-name">{{ band.name }}</h3>
+            <div class="genre-tags" v-if="band.genres && band.genres.length > 0">
+              <span v-for="g in band.genres.slice(0, 3)" :key="g" class="genre-tag">{{ g }}</span>
+            </div>
+            <div class="popularity-bar" v-if="band.popularity !== undefined">
+              <span class="pop-label">Popularity</span>
+              <div class="pop-track">
+                <div class="pop-fill" :style="{ width: band.popularity + '%' }"></div>
+              </div>
+              <span class="pop-value">{{ band.popularity }}</span>
+            </div>
+          </div>
         </div>
 
-        <!-- Band display -->
-        <div v-else-if="item.popularity !== undefined">
-          <p><strong>Popularity:</strong> {{ item.popularity }}</p>
+        <!-- Expanded Spotify player -->
+        <div v-if="expandedIndex === index" class="spotify-expand" @click.stop>
           <iframe
-            v-if="item.id"
-            :src="`https://open.spotify.com/embed/artist/${item.id}`"
-            width="300"
-            height="80"
+            :src="`https://open.spotify.com/embed/artist/${band.id}`"
+            width="100%"
+            height="152"
             frameborder="0"
             allowtransparency="true"
             allow="encrypted-media"
-            class="spotify-player spotify-artist"
+            class="spotify-player"
           ></iframe>
         </div>
       </div>
+    </div>
+
+    <!-- Album results (list layout) -->
+    <div v-if="albumResults.length > 0" class="album-list">
+      <div v-for="(album, index) in albumResults" :key="index" class="album-card">
+        <img
+          v-if="album.images && album.images.length > 0"
+          :src="album.images[0].url"
+          :alt="album.name"
+          class="album-cover"
+        />
+        <div class="album-info">
+          <h3>{{ album.name }}</h3>
+          <p v-if="album.release_date">{{ album.release_date }}</p>
+          <iframe
+            :src="`https://open.spotify.com/embed/album/${album.id}`"
+            width="100%"
+            height="152"
+            frameborder="0"
+            allowtransparency="true"
+            allow="encrypted-media"
+            class="spotify-player"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="searched && !isLoading && displayedBands.length === 0 && albumResults.length === 0" class="no-results">
+      No results found.
     </div>
   </section>
 </template>
 
 <script>
-import api from '@/api'; // ✅ correct if api.js is in src/
+import api from '@/api';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import { useToast } from 'vue-toastification';
 
 export default {
   name: 'SearchBands',
-  components: {
-    LoadingSpinner,
+  components: { LoadingSpinner },
+  setup() {
+    const toast = useToast();
+    return { toast };
   },
   data() {
     return {
       bandName: '',
       spotifyId: '',
-      results: [],
+      genreResults: [],   // from Show Bands button
+      albumResults: [],   // from album search
       searched: false,
       isLoading: false,
+      allGenres: [],
+      activeGenres: [],
+      expandedIndex: null,
     };
+  },
+  computed: {
+    results() {
+      return this.genreResults;
+    },
+    displayedBands() {
+      if (this.activeGenres.length === 0) return this.genreResults;
+      return this.genreResults.filter(band =>
+        band.genres && band.genres.some(g => this.activeGenres.includes(g))
+      );
+    },
   },
   methods: {
     async searchByGenre() {
       this.isLoading = true;
+      this.albumResults = [];
+      this.expandedIndex = null;
       try {
         const response = await api.get('/bands/searchByDeathMetalGenre');
-        this.results = response.data.artists?.items || [];
+        this.genreResults = response.data.artists?.items || [];
+        this.buildGenreList();
+        if (this.genreResults.length > 0) {
+          this.toast.success(`Loaded ${this.genreResults.length} bands`);
+        } else {
+          this.toast.warning('No bands found.');
+        }
       } catch (error) {
-        console.error('Error fetching death metal bands:', error);
-        this.results = [];
+        this.genreResults = [];
+        this.toast.error('Failed to fetch bands. Try again.');
       } finally {
         this.searched = true;
         this.isLoading = false;
       }
     },
     async searchBand() {
-      const bandName = this.bandName.trim();
-      if (!bandName) return;
-
+      const name = this.bandName.trim();
+      if (!name) return;
       this.isLoading = true;
+      this.albumResults = [];
+      this.allGenres = [];
+      this.activeGenres = [];
+      this.expandedIndex = null;
       try {
-        const response = await api.get(`/bands/searchByBandName?bandName=${encodeURIComponent(bandName)}`);
-        this.results = response.data.artists?.items || [];
+        const response = await api.get(`/bands/searchByBandName?bandName=${encodeURIComponent(name)}`);
+        this.genreResults = response.data.artists?.items || [];
+        if (this.genreResults.length > 0) {
+          this.toast.success(`Found ${this.genreResults.length} result(s) for "${name}"`);
+        } else {
+          this.toast.warning(`No bands found for "${name}"`);
+        }
       } catch (error) {
-        console.error('Error searching for band:', error);
-        this.results = [];
+        this.genreResults = [];
+        this.toast.error('Search failed. Try again.');
       } finally {
         this.searched = true;
         this.isLoading = false;
       }
     },
     async searchAlbums() {
-      const spotifyId = this.spotifyId.trim();
-      if (!spotifyId) return;
-
+      const id = this.spotifyId.trim();
+      if (!id) return;
       this.isLoading = true;
+      this.genreResults = [];
+      this.allGenres = [];
+      this.activeGenres = [];
+      this.expandedIndex = null;
       try {
-        const response = await api.get(`/bands/${encodeURIComponent(spotifyId)}/albums`);
-        this.results = response.data.items || [];
+        const response = await api.get(`/bands/${encodeURIComponent(id)}/albums`);
+        this.albumResults = response.data.items || [];
+        if (this.albumResults.length > 0) {
+          this.toast.success(`Loaded ${this.albumResults.length} album(s)`);
+        } else {
+          this.toast.warning('No albums found for that ID.');
+        }
       } catch (error) {
-        console.error('Error fetching albums:', error);
-        this.results = [];
+        this.albumResults = [];
+        this.toast.error('Failed to fetch albums. Check the Spotify ID.');
       } finally {
         this.searched = true;
         this.isLoading = false;
       }
     },
+    buildGenreList() {
+      const set = new Set();
+      this.genreResults.forEach(band => {
+        if (band.genres) band.genres.forEach(g => set.add(g));
+      });
+      this.allGenres = [...set].sort();
+      this.activeGenres = [];
+    },
+    toggleGenre(genre) {
+      const idx = this.activeGenres.indexOf(genre);
+      if (idx === -1) {
+        this.activeGenres.push(genre);
+      } else {
+        this.activeGenres.splice(idx, 1);
+      }
+    },
+    toggleExpand(index) {
+      this.expandedIndex = this.expandedIndex === index ? null : index;
+    },
     clearResults() {
       this.bandName = '';
       this.spotifyId = '';
-      this.results = [];
+      this.genreResults = [];
+      this.albumResults = [];
+      this.allGenres = [];
+      this.activeGenres = [];
       this.searched = false;
+      this.expandedIndex = null;
     },
   },
 };
 </script>
 
-
-
-
 <style scoped>
-#search-section h2 {
+#search-section {
+  padding-bottom: 2rem;
+}
+
+.section-title {
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
   margin-bottom: 2rem;
 }
 
+/* Controls */
 .search-controls {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   flex-wrap: wrap;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
 }
 
 .search-input-group {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  flex: 1;
-  justify-content: center;
+  gap: 0.5rem;
 }
 
-.band {
-  display: flex;
-  justify-content: space-between;
-  flex-direction: column;
-  align-items: center;
-  background-color: #222;
-  padding: 1rem;
-  margin-bottom: 0.5rem;
+input[type='text'] {
+  padding: 0.65rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #444;
   border-radius: 6px;
+  background-color: #1c1c1c;
+  color: #fff;
+  min-width: 220px;
+  transition: border-color 0.2s;
 }
 
-.band p {
-  text-align: center;
-  width: 100%;
+input[type='text']:focus {
+  outline: none;
+  border-color: crimson;
 }
 
-.band > div {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+input::placeholder {
+  color: #888;
 }
 
-button {
-  padding: 0.75rem 1.5rem;
-  margin-left: 1rem;
+.btn-primary {
+  padding: 0.65rem 1.4rem;
   background-color: crimson;
   color: white;
   border: none;
   border-radius: 6px;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  letter-spacing: 0.03em;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #a30000;
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  padding: 0.65rem 1.4rem;
+  background-color: #333;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 6px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-button:hover {
-  background-color: rgb(132, 12, 36);
+.btn-secondary:hover:not(:disabled) {
+  background-color: #444;
 }
 
-input[type='text'] {
-  padding: 0.75rem 1rem;
-  width: 375px;
-  font-size: 1.1rem;
+.btn-ghost {
+  padding: 0.65rem 1.2rem;
+  background: transparent;
+  color: #aaa;
   border: 1px solid #444;
   border-radius: 6px;
-  background-color: #727272;
-  color: white;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
 }
 
-input::placeholder {
-  color: rgb(220, 220, 220);
+.btn-ghost:hover {
+  color: #fff;
+  border-color: #888;
 }
 
-.album-cover {
-  width: 200px;
-  height: auto;
-  margin-top: 1rem;
-  border-radius: 4px;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+/* Genre filter bar */
+.genre-filter-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  color: #aaa;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-top: 0.35rem;
+  white-space: nowrap;
+}
+
+.genre-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.genre-chip {
+  padding: 0.3rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #444;
+  background: #1a1a1a;
+  color: #ccc;
+  transition: all 0.15s;
+  text-transform: capitalize;
+}
+
+.genre-chip:hover {
+  border-color: crimson;
+  color: #fff;
+}
+
+.genre-chip.active {
+  background-color: crimson;
+  border-color: crimson;
+  color: #fff;
+}
+
+/* Band grid */
+.band-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.band-card {
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.band-card:hover {
+  border-color: #550000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(220, 20, 60, 0.15);
+}
+
+.band-card.expanded {
+  border-color: crimson;
+  box-shadow: 0 0 20px rgba(220, 20, 60, 0.25);
+}
+
+.band-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.band-image-wrap {
+  flex-shrink: 0;
+}
+
+.band-image {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #333;
+}
+
+.band-image-placeholder {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #1e1e1e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  border: 2px solid #333;
+}
+
+.band-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.band-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.genre-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.genre-tag {
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  color: #bbb;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  text-transform: capitalize;
+}
+
+.popularity-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pop-label {
+  font-size: 0.7rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.pop-track {
+  flex: 1;
+  height: 4px;
+  background: #2a2a2a;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pop-fill {
+  height: 100%;
+  background: crimson;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.pop-value {
+  font-size: 0.7rem;
+  color: #888;
+  min-width: 22px;
+}
+
+/* Spotify expand area */
+.spotify-expand {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid #222;
 }
 
 .spotify-player {
-  margin-top: 1rem;
   border-radius: 8px;
   display: block;
-  border: none !important;
-  box-shadow: none;
-  outline: none;
-  background-color: transparent;
+  border: none;
+  margin-top: 0.75rem;
 }
 
-.spotify-album {
-  height: 250px; 
+/* Album list */
+.album-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.spotify-artist {
-  height: 80px; 
+.album-card {
+  display: flex;
+  gap: 1.5rem;
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 1.25rem;
+  align-items: flex-start;
 }
 
-.load-spinner {
-  transition-property: opacity;
-  transition-duration: 400ms;
-  font-size: 3rem;
-  display: block;
-  margin: 2rem auto;
-  color: crimson;
+.album-cover {
+  width: 120px;
+  height: 120px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
+.album-info {
+  flex: 1;
+}
 
-/* Mobile Styles */
-@media only screen and (max-width: 600px) {
+.album-info h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.4rem;
+}
+
+.album-info p {
+  color: #888;
+  font-size: 0.9rem;
+  margin: 0 0 0.75rem;
+}
+
+/* No results */
+.no-results {
+  text-align: center;
+  color: #666;
+  padding: 3rem 0;
+  font-size: 1.1rem;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
   .search-controls {
     flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
-    justify-content: center;
   }
 
   .search-input-group {
     width: 100%;
-    justify-content: center;
-  }
-
-  button {
-    width: 90%;
-    max-width: 150px;
-    margin: 0 auto;
   }
 
   input[type='text'] {
-    width: 90%;
+    width: 100%;
+    min-width: unset;
+    flex: 1;
+  }
+
+  .band-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .album-card {
+    flex-direction: column;
+  }
+
+  .album-cover {
+    width: 100%;
+    height: auto;
   }
 }
 </style>

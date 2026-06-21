@@ -1,86 +1,39 @@
 <template>
   <main>
     <section id="registration-section">
-      <h2>Create an Account</h2>
+      <h2>Create Account</h2>
       <form id="registration-form" @submit.prevent="register">
         <div class="input-group">
-          <label for="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            v-model="user.username"
-            required
-            placeholder="Enter username"
-          />
+          <label for="username">Username</label>
+          <input type="text" id="username" v-model="user.username" required placeholder="Enter username" />
         </div>
-
         <div class="input-group">
-          <label for="firstName">First Name:</label>
-          <input
-            type="text"
-            id="firstName"
-            v-model="user.firstName"
-            required
-            placeholder="Enter first name"
-          />
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" v-model="user.firstName" required placeholder="Enter first name" />
         </div>
-
         <div class="input-group">
-          <label for="lastName">Last Name:</label>
-          <input
-            type="text"
-            id="lastName"
-            v-model="user.lastName"
-            required
-            placeholder="Enter last name"
-          />
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" v-model="user.lastName" required placeholder="Enter last name" />
         </div>
-
         <div class="input-group">
-          <label for="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            v-model="user.email"
-            required
-            placeholder="Enter email"
-          />
+          <label for="email">Email</label>
+          <input type="email" id="email" v-model="user.email" required placeholder="Enter email" />
         </div>
-
         <div class="input-group">
-          <label for="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            v-model="user.password"
-            required
-            placeholder="Enter password"
-          />
+          <label for="password">Password</label>
+          <input type="password" id="password" v-model="user.password" required placeholder="Enter password" />
         </div>
-
         <div class="input-group">
-          <label for="confirmPassword">Confirm Password:</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            v-model="user.confirmPassword"
-            required
-            placeholder="Confirm password"
-          />
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" v-model="user.confirmPassword" required placeholder="Confirm password" />
         </div>
-
         <div class="input-group">
-          <label for="role">Role:</label>
+          <label for="role">Role</label>
           <select id="role" v-model="user.role" required>
             <option value="">Select a Role</option>
             <option value="ROLE_USER">User</option>
             <option value="ROLE_ADMIN">Admin</option>
           </select>
-        </div>
-
-        <!-- Status message -->
-        <div v-if="status.message" :class="['status-message', status.type]">
-          {{ status.message }}
         </div>
 
         <button type="submit">Register</button>
@@ -97,8 +50,13 @@
 
 <script>
 import authService from "@/services/AuthService";
+import { useToast } from "vue-toastification";
 
 export default {
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
   data() {
     return {
       user: {
@@ -110,26 +68,12 @@ export default {
         lastName: "",
         email: "",
       },
-      status: {
-        message: "",
-        type: "", // "success" or "error"
-      },
     };
   },
   methods: {
-    error(msg) {
-      this.status.message = msg;
-      this.status.type = "error";
-    },
-    success(msg) {
-      this.status.message = msg;
-      this.status.type = "success";
-    },
     register() {
-      this.status.message = ""; // clear previous messages
-
       if (this.user.password !== this.user.confirmPassword) {
-        this.error("Password & Confirm Password do not match");
+        this.toast.error("Passwords do not match.");
         return;
       }
 
@@ -137,20 +81,20 @@ export default {
         .register(this.user)
         .then((response) => {
           if (response.status === 201) {
-            this.success("Thank you for registering, please sign in.");
+            this.toast.success("Account created! Redirecting to login...");
             setTimeout(() => {
               this.$router.push("/login");
-            }, 3000); // delay redirect so user can read message
+            }, 1500);
           }
         })
         .catch((error) => {
           const response = error.response;
           if (!response) {
-            this.error("Network error. Please try again.");
+            this.toast.error("Network error. Please try again.");
           } else if (response.status === 400 && response.data.errors) {
-            this.error("Please check your input and try again.");
+            this.toast.error("Please check your input and try again.");
           } else {
-            this.error(response.data.message || "Registration failed.");
+            this.toast.error(response.data.message || "Registration failed.");
           }
         });
     },
@@ -160,11 +104,12 @@ export default {
 
 <style scoped>
 #registration-section {
-  max-width: 600px;
+  max-width: 480px;
   margin: 3rem auto;
-  background-color: #222;
-  padding: 2rem;
-  border-radius: 10px;
+  background-color: #111;
+  padding: 2.5rem;
+  border-radius: 12px;
+  border: 1px solid #2a2a2a;
   color: white;
 }
 
@@ -172,93 +117,99 @@ h2 {
   text-align: center;
   font-size: 1.8rem;
   margin-bottom: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.1rem;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
+  gap: 0.35rem;
 }
 
 label {
-  margin-bottom: 0.5rem;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 input,
 select {
-  padding: 0.75rem 1rem;
-  font-size: 1.1rem;
-  border: 1px solid #444;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #333;
   border-radius: 6px;
-  background-color: #727272;
+  background-color: #1c1c1c;
   color: white;
+  transition: border-color 0.2s;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: crimson;
 }
 
 input::placeholder {
-  color: rgb(220, 220, 220);
+  color: #555;
 }
 
-select {
-  background-color: #727272;
-  color: white;
+select option {
+  background-color: #1c1c1c;
 }
 
 button {
   align-self: center;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 2rem;
   background-color: crimson;
   color: white;
   border: none;
   border-radius: 6px;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: background-color 0.2s, transform 0.1s;
+  margin-top: 0.5rem;
 }
 
 button:hover {
-  background-color: rgb(132, 12, 36);
+  background-color: #a30000;
+}
+
+button:active {
+  transform: scale(0.97);
 }
 
 hr {
-  margin: 2rem 0 1rem 0;
+  margin: 1.5rem 0 1rem;
   border: none;
-  border-top: 1px solid #555;
+  border-top: 1px solid #2a2a2a;
 }
 
 .signin-link {
   text-align: center;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  color: #888;
 }
 
 .signin-link a {
   color: crimson;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.signin-link a:hover {
   text-decoration: underline;
-  font-weight: bold;
-}
-
-/* Status messages */
-.status-message {
-  margin-bottom: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 1.1rem;
-  text-align: center;
-}
-
-.status-message.success {
-  background-color: #4caf50; /* green */
-  color: white;
-}
-
-.status-message.error {
-  background-color: #f44336; /* red */
-  color: white;
 }
 </style>

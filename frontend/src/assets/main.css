@@ -1,8 +1,37 @@
 @import './base.css';
 
-/* Add global project styles here */
-
 * {
   font-size: 16px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Toast customization */
+.dmm-toast {
+  background-color: #1a1a1a !important;
+  color: #fff !important;
+  border: 1px solid #333 !important;
+  border-left: 4px solid crimson !important;
+  border-radius: 8px !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6) !important;
+}
+
+.Vue-Toastification__toast--success .dmm-toast,
+.Vue-Toastification__toast--success.dmm-toast {
+  border-left-color: #4caf50 !important;
+}
+
+.Vue-Toastification__toast--error .dmm-toast,
+.Vue-Toastification__toast--error.dmm-toast {
+  border-left-color: crimson !important;
+}
+
+.Vue-Toastification__toast--warning .dmm-toast,
+.Vue-Toastification__toast--warning.dmm-toast {
+  border-left-color: #ff9800 !important;
+}
+
+.Vue-Toastification__progress-bar {
+  background-color: crimson !important;
 }

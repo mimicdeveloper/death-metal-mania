@@ -3,39 +3,39 @@
     <section id="updateProfileSection">
       <h2>Update Profile</h2>
       <form @submit.prevent="updateProfile">
-        <label for="email">Email:</label>
-        <input type="email" id="email" v-model="email" required />
-
-        <label for="firstName">First Name:</label>
-        <input type="text" id="firstName" v-model="firstName" required />
-
-        <label for="lastName">Last Name:</label>
-        <input type="text" id="lastName" v-model="lastName" required />
-
+        <div class="input-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" v-model="email" required placeholder="Enter email" />
+        </div>
+        <div class="input-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" v-model="firstName" required placeholder="Enter first name" />
+        </div>
+        <div class="input-group">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" v-model="lastName" required placeholder="Enter last name" />
+        </div>
         <button type="submit">Update</button>
       </form>
-
-      <div v-if="status.message" :class="['status-message', status.type]">
-        {{ status.message }}
-      </div>
     </section>
   </main>
 </template>
 
 <script>
 import api from '@/api';
+import { useToast } from 'vue-toastification';
 
 export default {
   name: 'UpdateProfileView',
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
   data() {
     return {
       email: '',
       firstName: '',
       lastName: '',
-      status: {
-        message: '',
-        type: '', // 'success' or 'error'
-      }
     };
   },
   async created() {
@@ -44,7 +44,6 @@ export default {
       this.$router.push('/login');
       return;
     }
-
     try {
       const response = await api.get('/user', {
         headers: { Authorization: `Bearer ${token}` }
@@ -63,111 +62,102 @@ export default {
     async updateProfile() {
       try {
         const token = this.$store.state.token || localStorage.getItem('token');
-        const profileData = {
-          firstName: this.firstName,
-          lastName: this.lastName,
-          email: this.email,
-        };
-
-        await api.put('/user', profileData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        this.status.message = 'Profile updated successfully.';
-        this.status.type = 'success';
+        await api.put(
+          '/user',
+          { firstName: this.firstName, lastName: this.lastName, email: this.email },
+          { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        this.toast.success('Profile updated successfully!');
       } catch (err) {
         console.error(err);
-        if (err.response && err.response.data) {
-          this.status.message = `Failed to update profile: ${err.response.data.message || 'Unknown error'}`;
-        } else {
-          this.status.message = 'Failed to update profile.';
-        }
-        this.status.type = 'error';
+        const msg = err.response?.data?.message || 'Failed to update profile.';
+        this.toast.error(msg);
       }
     }
   }
 };
 </script>
 
-
 <style scoped>
 #updateProfileSection {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem;
+  max-width: 480px;
+  margin: 3rem auto;
+  background-color: #111;
+  padding: 2.5rem;
+  border-radius: 12px;
+  border: 1px solid #2a2a2a;
   color: #fff;
 }
 
 h2 {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
   text-align: center;
-  color: #fff;
-  font-weight: bold;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 form {
-  background-color: #2b2b2b;
-  padding: 2rem;
-  border-radius: 8px;
-  max-width: 400px;
-  width: 100%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
 }
 
-form label {
-  display: block;
-  margin: 0.5rem 0 0.25rem;
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
-form input {
-  width: 100%;
-  padding: 0.5rem;
-  margin-bottom: 1rem;
-  background: #1a1a1a;
+label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+input {
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  background: #1c1c1c;
   color: #fff;
-  border: 1px solid #444;
-  border-radius: 4px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  transition: border-color 0.2s;
 }
 
-form button {
+input:focus {
+  outline: none;
+  border-color: crimson;
+}
+
+input::placeholder {
+  color: #555;
+}
+
+button {
+  align-self: center;
   background-color: crimson;
   color: white;
-  padding: 0.75rem 1.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 700;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  display: block;
-  margin: 1rem auto 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: background-color 0.2s, transform 0.1s;
+  margin-top: 0.5rem;
 }
 
-form button:hover {
+button:hover {
   background-color: #a30000;
 }
 
-/* Status message styling */
-.status-message {
-  margin-top: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 1.1rem;
-  text-align: center;
-}
-
-.status-message.success {
-  background-color: #4caf50;
-  color: white;
-}
-
-.status-message.error {
-  background-color: #f44336;
-  color: white;
+button:active {
+  transform: scale(0.97);
 }
 </style>

@@ -25,6 +25,7 @@
     height: auto;
     display: block;
     margin: 0 auto;
+    mix-blend-mode: screen;
   }
   </style>
   
