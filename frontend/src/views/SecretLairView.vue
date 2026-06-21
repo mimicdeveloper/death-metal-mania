@@ -214,7 +214,11 @@ export default {
         const response = await api.get(`/bands/searchBySubgenre?${params}`);
         this.genreResults = response.data.artists?.items || [];
         this.buildGenreList();
-        this.toast.success(`${this.genreResults.length} crawled out of the lair`);
+        if (this.genreResults.length > 0) {
+          this.toast.success(`${this.genreResults.length} crawled out of the lair`);
+        } else {
+          this.toast.warning(`Nothing stirred in the lair for ${g.label}`);
+        }
       } catch {
         this.genreResults = [];
         this.toast.error('The lair is sealed. Try again.');

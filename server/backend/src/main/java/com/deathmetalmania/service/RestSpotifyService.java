@@ -32,43 +32,38 @@ public class RestSpotifyService implements SpotifyService {
 
     @Override
     public SpotifyApi searchBySubgenre(String genreKeyword, String[] allowTerms, String[] blockTerms) {
-        String url = "https://api.spotify.com/v1/search";
-        RestClient restClient = RestClient.builder().baseUrl(url).build();
+        RestClient restClient = RestClient.create();
 
         List<SpotifyApi.Artist> allArtists = new ArrayList<>();
         int limit = 50;
         int maxPages = 10;
 
-        String encodedQuery;
+        String encodedKeyword;
         try {
-            String raw = "genre:\"" + genreKeyword + "\"";
-            String once = URLEncoder.encode(raw, StandardCharsets.UTF_8).replace("+", "%20");
-            encodedQuery = URLEncoder.encode(once, StandardCharsets.UTF_8).replace("+", "%20");
+            encodedKeyword = URLEncoder.encode(genreKeyword, StandardCharsets.UTF_8).replace("+", "%20");
         } catch (Exception e) {
-            throw new ServiceException("Failed to encode genre query");
+            encodedKeyword = genreKeyword.replace(" ", "%20");
         }
 
-        final String finalQuery = encodedQuery;
         for (int page = 0; page < maxPages; page++) {
             int offset = page * limit;
-            SpotifyApi partialResults = restClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .queryParam("q", finalQuery)
-                            .queryParam("type", "artist")
-                            .queryParam("limit", String.valueOf(limit))
-                            .queryParam("offset", String.valueOf(offset))
-                            .build())
-                    .header("Authorization", "Bearer " + getAccessToken())
-                    .retrieve()
-                    .body(SpotifyApi.class);
+            String searchUrl = BASE_URL + "search?q=" + encodedKeyword
+                    + "&type=artist&limit=" + limit + "&offset=" + offset;
 
-            if (partialResults == null || partialResults.getArtists() == null || partialResults.getArtists().getItems() == null) break;
-            allArtists.addAll(partialResults.getArtists().getItems());
-            if (partialResults.getArtists().getItems().size() < limit) break;
-        }
+            try {
+                SpotifyApi partialResults = restClient.get()
+                        .uri(searchUrl)
+                        .header("Authorization", "Bearer " + getAccessToken())
+                        .retrieve()
+                        .body(SpotifyApi.class);
 
-        if (allArtists.isEmpty()) {
-            throw new ServiceException("No artists found for genre: " + genreKeyword);
+                if (partialResults == null || partialResults.getArtists() == null
+                        || partialResults.getArtists().getItems() == null) break;
+                allArtists.addAll(partialResults.getArtists().getItems());
+                if (partialResults.getArtists().getItems().size() < limit) break;
+            } catch (Exception e) {
+                break;
+            }
         }
 
         List<String> allowed = Arrays.asList(allowTerms);
@@ -77,16 +72,17 @@ public class RestSpotifyService implements SpotifyService {
         List<SpotifyApi.Artist> filtered = allArtists.stream()
                 .filter(artist -> {
                     if (artist.getGenres() == null || artist.getGenres().isEmpty()) return false;
-                    List<String> genres = artist.getGenres().stream().map(String::toLowerCase).collect(Collectors.toList());
-                    boolean hasBlock = genres.stream().anyMatch(g -> blocked.stream().anyMatch(g::contains));
-                    if (hasBlock) return false;
-                    return genres.stream().anyMatch(g -> allowed.stream().anyMatch(g::contains));
+                    List<String> genres = artist.getGenres().stream()
+                            .map(String::toLowerCase).collect(Collectors.toList());
+                    if (!blocked.isEmpty()) {
+                        boolean hasBlock = genres.stream().anyMatch(g ->
+                                blocked.stream().anyMatch(term -> !term.isBlank() && g.contains(term)));
+                        if (hasBlock) return false;
+                    }
+                    return genres.stream().anyMatch(g ->
+                            allowed.stream().anyMatch(term -> !term.isBlank() && g.contains(term)));
                 })
                 .collect(Collectors.toList());
-
-        if (filtered.isEmpty()) {
-            throw new ServiceException("No matching artists found after filtering for: " + genreKeyword);
-        }
 
         SpotifyApi.ArtistResponse response = new SpotifyApi.ArtistResponse();
         response.setItems(filtered);

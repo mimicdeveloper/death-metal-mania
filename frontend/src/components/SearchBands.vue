@@ -148,7 +148,7 @@ import { useToast } from 'vue-toastification';
 
 const SUBGENRE_BUTTONS = [
   { key: 'death-metal',   label: 'Death Metal',           genre: 'death metal',       allow: 'death metal,slam,brutal death,hardcore death,blackened death,death and roll,swedish death,finnish death,old school death,cavernous', block: 'deathcore,metalcore' },
-  { key: 'slam',          label: 'Slam',                  genre: 'slam death metal',  allow: 'slam',           block: 'deathcore' },
+  { key: 'slam',          label: 'Slam',                  genre: 'slam death metal',  allow: 'slam,slamming,brutal slam', block: 'deathcore' },
   { key: 'brutal',        label: 'Brutal Death Metal',    genre: 'brutal death metal',allow: 'brutal death',   block: 'deathcore,metalcore' },
   { key: 'cavernous',     label: 'Cavernous Death Metal', genre: 'cavernous death metal', allow: 'cavernous', block: '' },
   { key: 'blackened',     label: 'Blackened Death Metal', genre: 'blackened death metal', allow: 'blackened death', block: '' },
@@ -222,10 +222,14 @@ export default {
         const response = await api.get(`/bands/searchBySubgenre?${params}`);
         this.genreResults = response.data.artists?.items || [];
         this.buildGenreList();
-        this.toast.success(`Loaded ${this.genreResults.length} bands`);
+        if (this.genreResults.length > 0) {
+          this.toast.success(`Loaded ${this.genreResults.length} bands`);
+        } else {
+          this.toast.warning(`No results for ${g.label} — try a broader genre`);
+        }
       } catch {
         this.genreResults = [];
-        this.toast.error('Failed to fetch bands. Try again.');
+        this.toast.error('Could not reach the backend. Is Koyeb up?');
       } finally {
         this.searched = true;
         this.isLoading = false;

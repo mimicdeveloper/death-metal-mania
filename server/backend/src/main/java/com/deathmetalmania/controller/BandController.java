@@ -68,15 +68,9 @@ public class BandController {
             @RequestParam String genre,
             @RequestParam(defaultValue = "") String allow,
             @RequestParam(defaultValue = "") String block) {
-        try {
-            String[] allowTerms = allow.isEmpty() ? new String[]{genre} : allow.split(",");
-            String[] blockTerms = block.isEmpty() ? new String[]{} : block.split(",");
-            SpotifyApi result = spotifyService.searchBySubgenre(genre, allowTerms, blockTerms);
-            if (result == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No bands found");
-            return result;
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error: " + e.getMessage());
-        }
+        String[] allowTerms = allow.isEmpty() ? new String[]{genre} : allow.split(",");
+        String[] blockTerms = block.isEmpty() ? new String[]{} : block.split(",");
+        return spotifyService.searchBySubgenre(genre, allowTerms, blockTerms);
     }
 
     //Search by band name
