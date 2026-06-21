@@ -87,20 +87,19 @@ public class RestSpotifyService implements SpotifyService {
             throw new ServiceException("No artists found using fallback query.");
         }
 
-        // Filtering out black metal, metalcore, nu metal, and banned bands "Chon" and "Heavy//Hitter"
+        // Allowlist: keep ONLY bands whose Spotify genre tags include death metal or slam.
         List<SpotifyApi.Artist> filteredArtists = allArtists.stream()
                 .filter(artist -> {
-                    String artistName = artist.getName() != null ? artist.getName().toLowerCase() : "";
-                    boolean isBannedBand = artistName.equals("chon") || artistName.equals("heavy//hitter") || artistName.equals("poppy");
-                    boolean hasBlockedGenre = artist.getGenres() != null && artist.getGenres().stream().anyMatch(
+                    if (artist.getGenres() == null || artist.getGenres().isEmpty()) {
+                        return false;
+                    }
+                    return artist.getGenres().stream().anyMatch(
                             genre -> {
                                 String lowerGenre = genre.toLowerCase();
-                                return lowerGenre.contains("black metal") ||
-                                        lowerGenre.contains("metalcore") ||
-                                        lowerGenre.contains("nu metal");
+                                return lowerGenre.contains("death metal") ||
+                                        lowerGenre.contains("slam");
                             }
                     );
-                    return !isBannedBand && !hasBlockedGenre;
                 })
                 .collect(Collectors.toList());
 
