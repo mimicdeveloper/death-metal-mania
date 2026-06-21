@@ -2,20 +2,11 @@
   <section id="search-section">
     <h2 class="section-title">Death Metal Bands</h2>
 
-    <!-- Primary genre buttons -->
-    <div class="genre-buttons">
-      <button
-        v-for="g in genreButtons"
-        :key="g.key"
-        class="genre-btn"
-        :class="{ active: activeButton === g.key }"
-        :disabled="isLoading"
-        @click="loadGenre(g)"
-      >{{ g.label }}</button>
-    </div>
-
     <!-- Band name search -->
     <div class="search-row">
+      <button class="btn-load" @click="loadDeathMetal" :disabled="isLoading" :class="{ active: bandsLoaded }">
+        {{ isLoading ? 'Loading...' : 'Show Death Metal Bands' }}
+      </button>
       <input type="text" v-model="bandName" placeholder="Search by band name..." @keyup.enter="searchBand" />
       <button class="btn-primary" @click="searchBand" :disabled="isLoading">Search</button>
       <button class="btn-ghost" @click="clearResults" v-if="genreResults.length > 0">Clear</button>
@@ -146,19 +137,6 @@ import api from '@/api';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { useToast } from 'vue-toastification';
 
-const SUBGENRE_BUTTONS = [
-  { key: 'death-metal',   label: 'Death Metal',           genre: 'death metal',       allow: 'death metal,slam,brutal death,hardcore death,blackened death,death and roll,swedish death,finnish death,old school death,cavernous', block: 'deathcore,metalcore' },
-  { key: 'slam',          label: 'Slam',                  genre: 'slam death metal',  allow: 'slam,slamming,brutal slam', block: 'deathcore' },
-  { key: 'brutal',        label: 'Brutal Death Metal',    genre: 'brutal death metal',allow: 'brutal death',   block: 'deathcore,metalcore' },
-  { key: 'cavernous',     label: 'Cavernous Death Metal', genre: 'cavernous death metal', allow: 'cavernous', block: '' },
-  { key: 'blackened',     label: 'Blackened Death Metal', genre: 'blackened death metal', allow: 'blackened death', block: '' },
-  { key: 'old-school',    label: 'Old School Death Metal',genre: 'old school death metal', allow: 'old school death,death metal', block: 'deathcore' },
-  { key: 'swedish',       label: 'Swedish Death Metal',   genre: 'swedish death metal', allow: 'swedish death', block: '' },
-  { key: 'death-roll',    label: 'Death & Roll',          genre: 'death and roll',    allow: 'death and roll,death metal', block: '' },
-  { key: 'technical',     label: 'Technical Death Metal', genre: 'technical death metal', allow: 'technical death,death metal', block: 'deathcore' },
-  { key: 'hardcore-death',label: 'Hardcore Death Metal',  genre: 'hardcore death metal',  allow: 'hardcore death,death metal', block: 'deathcore,metalcore' },
-];
-
 const PAGE_SIZE = 24;
 
 export default {
@@ -175,13 +153,12 @@ export default {
       isLoading: false,
       allGenres: [],
       activeGenres: [],
-      activeButton: null,
+      bandsLoaded: false,
       currentPage: 1,
       expandedBandId: null,
       expandedAlbumId: null,
       bandAlbums: {},
       loadingAlbums: new Set(),
-      genreButtons: SUBGENRE_BUTTONS,
     };
   },
   computed: {
@@ -209,24 +186,22 @@ export default {
     },
   },
   methods: {
-    async loadGenre(g) {
+    async loadDeathMetal() {
       this.isLoading = true;
-      this.activeButton = g.key;
       this.expandedBandId = null;
       this.expandedAlbumId = null;
       this.currentPage = 1;
       this.activeGenres = [];
+      this.bandName = '';
       try {
-        const params = new URLSearchParams({ genre: g.genre });
-        if (g.allow) params.append('allow', g.allow);
-        if (g.block) params.append('block', g.block);
-        const response = await api.get(`/bands/searchBySubgenre?${params}`);
+        const response = await api.get('/bands/searchByDeathMetalGenre');
         this.genreResults = response.data.artists?.items || [];
         this.buildGenreList();
+        this.bandsLoaded = true;
         if (this.genreResults.length > 0) {
-          this.toast.success(`Loaded ${this.genreResults.length} bands`);
+          this.toast.success(`Loaded ${this.genreResults.length} death metal bands`);
         } else {
-          this.toast.warning(`No results for ${g.label} — try a broader genre`);
+          this.toast.warning('No bands returned — check backend connection');
         }
       } catch {
         this.genreResults = [];
@@ -336,7 +311,7 @@ export default {
       this.allGenres = [];
       this.activeGenres = [];
       this.searched = false;
-      this.activeButton = null;
+      this.bandsLoaded = false;
       this.expandedBandId = null;
       this.expandedAlbumId = null;
       this.currentPage = 1;
@@ -358,33 +333,6 @@ export default {
   color: #fff;
   margin-bottom: 1.5rem;
 }
-
-/* Genre buttons */
-.genre-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  justify-content: center;
-  margin-bottom: 1.25rem;
-}
-
-.genre-btn {
-  padding: 0.5rem 1rem;
-  background: #1a1a1a;
-  color: #aaa;
-  border: 1px solid #2a2a2a;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.genre-btn:hover:not(:disabled) { background: #222; color: #fff; border-color: #444; }
-.genre-btn.active { background: crimson; color: #fff; border-color: crimson; }
-.genre-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Search row */
 .search-row {
@@ -427,6 +375,25 @@ input::placeholder { color: #444; }
 
 .btn-primary:hover:not(:disabled) { background: #a30000; }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-load {
+  padding: 0.6rem 1.4rem;
+  background: #1a0008;
+  color: crimson;
+  border: 1px solid crimson;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-load:hover:not(:disabled) { background: crimson; color: #fff; }
+.btn-load.active { background: crimson; color: #fff; }
+.btn-load:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-ghost {
   padding: 0.6rem 1rem;

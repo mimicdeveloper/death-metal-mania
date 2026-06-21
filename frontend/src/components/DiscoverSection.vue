@@ -1,6 +1,29 @@
 <template>
   <section class="discover-section">
 
+    <!-- Subgenre Playlists -->
+    <div class="discover-block">
+      <h2 class="discover-heading">
+        <span class="heading-line"></span>
+        Browse by Subgenre
+        <span class="heading-line"></span>
+      </h2>
+      <div class="cards-scroll">
+        <a
+          v-for="sub in subgenres"
+          :key="sub.label"
+          :href="sub.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="genre-card"
+          :style="{ '--accent': sub.color }"
+        >
+          <span class="genre-icon">{{ sub.icon }}</span>
+          <span class="genre-label">{{ sub.label }}</span>
+        </a>
+      </div>
+    </div>
+
     <!-- Podcasts -->
     <div class="discover-block">
       <h2 class="discover-heading">
@@ -68,6 +91,34 @@ export default {
   name: 'DiscoverSection',
   data() {
     return {
+      subgenres: [
+        { label: 'Death Metal',             icon: '💀', color: '#dc143c', url: 'https://open.spotify.com/search/death%20metal/playlists' },
+        { label: 'Slam Death Metal',        icon: '🩸', color: '#8b0000', url: 'https://open.spotify.com/search/slam%20death%20metal/playlists' },
+        { label: 'Brutal Death Metal',      icon: '🔪', color: '#6b0000', url: 'https://open.spotify.com/search/brutal%20death%20metal/playlists' },
+        { label: 'Technical Death Metal',   icon: '🎛️', color: '#1c4a1c', url: 'https://open.spotify.com/search/technical%20death%20metal/playlists' },
+        { label: 'Melodic Death Metal',     icon: '🎸', color: '#2a0050', url: 'https://open.spotify.com/search/melodic%20death%20metal/playlists' },
+        { label: 'Blackened Death Metal',   icon: '⚫', color: '#1a1a2e', url: 'https://open.spotify.com/search/blackened%20death%20metal/playlists' },
+        { label: 'Old School Death Metal',  icon: '📼', color: '#5a3e00', url: 'https://open.spotify.com/search/old%20school%20death%20metal/playlists' },
+        { label: 'Swedish Death Metal',     icon: '🪓', color: '#006aa7', url: 'https://open.spotify.com/search/swedish%20death%20metal/playlists' },
+        { label: 'Finnish Death Metal',     icon: '🌲', color: '#003580', url: 'https://open.spotify.com/search/finnish%20death%20metal/playlists' },
+        { label: 'Cavernous Death Metal',   icon: '🕳️', color: '#2a2a2a', url: 'https://open.spotify.com/search/cavernous%20death%20metal/playlists' },
+        { label: 'Death-Doom Metal',        icon: '⚰️', color: '#1a0a2a', url: 'https://open.spotify.com/search/death%20doom%20metal/playlists' },
+        { label: 'Hardcore Death Metal',    icon: '🔨', color: '#7a0000', url: 'https://open.spotify.com/search/hardcore%20death%20metal/playlists' },
+        { label: 'Death & Roll',            icon: '🎸', color: '#4a0e00', url: 'https://open.spotify.com/search/death%20and%20roll/playlists' },
+        { label: 'Death Thrash',            icon: '⚡', color: '#b8860b', url: 'https://open.spotify.com/search/death%20thrash%20metal/playlists' },
+        { label: 'Progressive Death Metal', icon: '🌀', color: '#0a3a4a', url: 'https://open.spotify.com/search/progressive%20death%20metal/playlists' },
+        { label: 'Sci-Fi Death Metal',      icon: '🛸', color: '#7b2fbe', url: 'https://open.spotify.com/search/sci%20fi%20death%20metal/playlists' },
+        { label: 'Floridian Death Metal',   icon: '🐊', color: '#1a4a1a', url: 'https://open.spotify.com/search/florida%20death%20metal/playlists' },
+        { label: 'New York Death Metal',    icon: '🗽', color: '#2a2a50', url: 'https://open.spotify.com/search/new%20york%20death%20metal/playlists' },
+        { label: 'War Metal',               icon: '💣', color: '#2a1a00', url: 'https://open.spotify.com/search/war%20metal/playlists' },
+        { label: 'Atmospheric Death Metal', icon: '🌫️', color: '#0a1a2a', url: 'https://open.spotify.com/search/atmospheric%20death%20metal/playlists' },
+        { label: 'Industrial Death Metal',  icon: '⚙️', color: '#1a1a1a', url: 'https://open.spotify.com/search/industrial%20death%20metal/playlists' },
+        { label: 'Goregrind',               icon: '🧠', color: '#3a0000', url: 'https://open.spotify.com/search/goregrind/playlists' },
+        { label: 'Grindcore',               icon: '💥', color: '#2a0a00', url: 'https://open.spotify.com/search/grindcore/playlists' },
+        { label: 'Cosmic Death Metal',      icon: '🌌', color: '#0a0a3a', url: 'https://open.spotify.com/search/cosmic%20death%20metal/playlists' },
+        { label: 'Dissonant Death Metal',   icon: '🔊', color: '#1a1500', url: 'https://open.spotify.com/search/dissonant%20death%20metal/playlists' },
+        { label: 'Crust Punk',              icon: '🏴', color: '#0a0a0a', url: 'https://open.spotify.com/search/crust%20punk/playlists' },
+      ],
       podcasts: [
         { name: 'Heavy Hole',              desc: 'Deep cuts in death metal',           url: 'https://open.spotify.com/search/Heavy%20Hole%20podcast' },
         { name: 'The Garza Podcast',       desc: 'Metal talk with Marcos Garza',       url: 'https://open.spotify.com/search/Garza%20podcast%20metal' },
@@ -140,6 +191,47 @@ export default {
 .cards-scroll::-webkit-scrollbar { height: 4px; }
 .cards-scroll::-webkit-scrollbar-track { background: transparent; }
 .cards-scroll::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+
+.genre-card {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.1rem 1rem;
+  min-width: 140px;
+  border-radius: 10px;
+  background: #111;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.2s;
+  border-bottom: 3px solid var(--accent, crimson);
+  position: relative;
+  overflow: hidden;
+}
+
+.genre-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 120%, var(--accent, crimson) 0%, transparent 70%);
+  opacity: 0.08;
+  transition: opacity 0.2s;
+}
+
+.genre-card:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,0.5); }
+.genre-card:hover::before { opacity: 0.18; }
+
+.genre-icon { font-size: 1.8rem; line-height: 1; }
+
+.genre-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ddd;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+}
 
 .label-card {
   flex-shrink: 0;
