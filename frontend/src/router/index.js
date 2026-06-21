@@ -13,80 +13,26 @@ import FavoritesView from '../views/FavoritesView.vue'
 import AdminView from '../views/AdminView.vue'
 import EventsView from '../views/EventsView.vue'
 import SecretLairView from '../views/SecretLairView.vue'
+import OracleView from '../views/OracleView.vue'
+import AboutView from '../views/AboutView.vue'
+import DonateView from '../views/DonateView.vue'
 
 const routes = [
-  {
-    path: '/',
-    name: 'home',
-    component: HomeView,
-    meta: { requiresAuth: false }
-  },
-  {
-    path: '/login',
-    name: 'login',
-    component: LoginView,
-    meta: { requiresAuth: false }
-  },
-  {
-    path: '/logout',
-    name: 'logout',
-    component: LogoutView,
-    meta: { requiresAuth: false }
-  },
-  {
-    path: '/register',
-    name: 'register',
-    component: RegisterView,
-    meta: { requiresAuth: false }
-  },
-  {
-    path: '/contact',
-    name: 'contact',
-    component: ContactView,
-    meta: { requiresAuth: false }
-  },
-  {
-    path: '/user',
-    name: 'user',
-    component: UserView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/profile',
-    name: 'profile',
-    component: ProfileView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/update-profile',
-    name: 'update-profile',
-    component: UpdateProfileView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/favorites',
-    name: 'favorites',
-    component: FavoritesView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/admin',
-    name: 'admin',
-    component: AdminView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/events',
-    name: 'events',
-    component: EventsView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/secret-lair',
-    name: 'secret-lair',
-    component: SecretLairView,
-    meta: { requiresAuth: false }
-  }
+  { path: '/',              name: 'home',           component: HomeView,          meta: { requiresAuth: false } },
+  { path: '/login',         name: 'login',          component: LoginView,         meta: { requiresAuth: false } },
+  { path: '/logout',        name: 'logout',         component: LogoutView,        meta: { requiresAuth: false } },
+  { path: '/register',      name: 'register',       component: RegisterView,      meta: { requiresAuth: false } },
+  { path: '/contact',       name: 'contact',        component: ContactView,       meta: { requiresAuth: false } },
+  { path: '/user',          name: 'user',           component: UserView,          meta: { requiresAuth: true  } },
+  { path: '/profile',       name: 'profile',        component: ProfileView,       meta: { requiresAuth: true  } },
+  { path: '/update-profile',name: 'update-profile', component: UpdateProfileView, meta: { requiresAuth: true  } },
+  { path: '/favorites',     name: 'favorites',      component: FavoritesView,     meta: { requiresAuth: true  } },
+  { path: '/admin',         name: 'admin',          component: AdminView,         meta: { requiresAuth: true  } },
+  { path: '/events',        name: 'events',         component: EventsView,        meta: { requiresAuth: true  } },
+  { path: '/secret-lair',   name: 'secret-lair',    component: SecretLairView,    meta: { requiresAuth: false } },
+  { path: '/oracle',        name: 'oracle',         component: OracleView,        meta: { requiresAuth: false } },
+  { path: '/about',         name: 'about',          component: AboutView,         meta: { requiresAuth: false } },
+  { path: '/donate',        name: 'donate',         component: DonateView,        meta: { requiresAuth: false } },
 ]
 
 const router = createRouter({

@@ -8,7 +8,9 @@
       <!-- Desktop links -->
       <div class="nav-links">
         <button class="nav-link" @click="go('/')">Home</button>
-        <button class="nav-link" @click="go('/contact')">Contact</button>
+        <button class="nav-link nav-link--highlight" @click="go('/oracle')">👁 Oracle</button>
+        <button class="nav-link" @click="go('/about')">About</button>
+        <button class="nav-link" @click="go('/donate')">Donate</button>
 
         <template v-if="isLoggedIn">
           <button class="nav-link" @click="go('/user')">Profile</button>
@@ -32,7 +34,9 @@
     <!-- Mobile drawer -->
     <div class="mobile-menu" :class="{ open: menuOpen }" @click="menuOpen = false">
       <button class="mobile-link" @click="go('/')">Home</button>
-      <button class="mobile-link" @click="go('/contact')">Contact</button>
+      <button class="mobile-link mobile-link--oracle" @click="go('/oracle')">👁 Oracle</button>
+      <button class="mobile-link" @click="go('/about')">About</button>
+      <button class="mobile-link" @click="go('/donate')">Donate</button>
 
       <template v-if="isLoggedIn">
         <button class="mobile-link" @click="go('/user')">Profile</button>
@@ -62,12 +66,8 @@ export default {
     return { menuOpen: false };
   },
   computed: {
-    isLoggedIn() {
-      return !!this.$store.state.token;
-    },
-    isAdmin() {
-      return this.$store.state.user?.role === 'ROLE_ADMIN';
-    },
+    isLoggedIn() { return !!this.$store.state.token; },
+    isAdmin() { return this.$store.state.user?.role === 'ROLE_ADMIN'; },
   },
   methods: {
     go(path) {
@@ -97,7 +97,6 @@ export default {
   height: 52px;
 }
 
-/* Brand */
 .nav-brand {
   background: none;
   border: none;
@@ -111,47 +110,37 @@ export default {
   white-space: nowrap;
 }
 
-.nav-brand:hover {
-  color: #ff2a4a;
-}
+.nav-brand:hover { color: #ff2a4a; }
 
-/* Desktop links */
 .nav-links {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .nav-link {
   background: none;
   border: none;
   color: #aaa;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
-  padding: 0.45rem 0.85rem;
+  padding: 0.4rem 0.7rem;
   border-radius: 6px;
   transition: color 0.15s, background 0.15s;
   white-space: nowrap;
 }
 
-.nav-link:hover {
-  color: #fff;
-  background: #161616;
-}
+.nav-link:hover { color: #fff; background: #161616; }
+.nav-link--active { color: crimson; }
+.nav-link--active:hover { color: #fff; background: crimson; }
+.nav-link--highlight { color: #8844cc; }
+.nav-link--highlight:hover { color: #fff; background: #2a1040; }
 
-.nav-link--active {
-  color: crimson;
-}
-
-.nav-link--active:hover {
-  color: #fff;
-  background: crimson;
-}
-
-/* Hamburger */
 .hamburger {
   display: none;
   flex-direction: column;
@@ -165,22 +154,12 @@ export default {
   height: 32px;
 }
 
-.hamburger span {
-  display: block;
-  width: 22px;
-  height: 2px;
-  background: #aaa;
-  border-radius: 2px;
-  transition: transform 0.2s, opacity 0.2s, background 0.2s;
-}
-
+.hamburger span { display: block; width: 22px; height: 2px; background: #aaa; border-radius: 2px; transition: transform 0.2s, opacity 0.2s, background 0.2s; }
 .hamburger:hover span { background: crimson; }
-
 .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .hamburger.open span:nth-child(2) { opacity: 0; }
 .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-/* Mobile drawer */
 .mobile-menu {
   display: none;
   flex-direction: column;
@@ -192,9 +171,7 @@ export default {
   transition: max-height 0.25s ease;
 }
 
-.mobile-menu.open {
-  max-height: 400px;
-}
+.mobile-menu.open { max-height: 500px; }
 
 .mobile-link {
   background: none;
@@ -210,16 +187,18 @@ export default {
   transition: color 0.15s, background 0.15s;
 }
 
-.mobile-link:hover {
-  color: #fff;
-  background: #161616;
-}
-
+.mobile-link:hover { color: #fff; background: #161616; }
 .mobile-link--cta { color: crimson; }
 .mobile-link--cta:hover { background: crimson; color: #fff; }
-
 .mobile-link--danger { color: #888; }
 .mobile-link--danger:hover { color: crimson; background: #111; }
+.mobile-link--oracle { color: #8844cc; }
+.mobile-link--oracle:hover { background: #1a0a2a; color: #bb66ff; }
+
+@media (max-width: 900px) {
+  .nav-links { gap: 0; }
+  .nav-link { padding: 0.4rem 0.5rem; font-size: 0.75rem; }
+}
 
 @media (max-width: 768px) {
   .nav-links { display: none; }
