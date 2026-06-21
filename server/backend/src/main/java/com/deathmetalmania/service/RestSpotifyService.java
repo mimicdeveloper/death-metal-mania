@@ -116,7 +116,7 @@ public class RestSpotifyService implements SpotifyService {
 
         List<SpotifyApi.Artist> allArtists = new ArrayList<>();
         int limit = 50;
-        int maxPages = 10;
+        int maxPages = 20;
 
         for (int page = 0; page < maxPages; page++) {
             int offset = page * limit;
