@@ -8,26 +8,16 @@ public class SpotifyApi {
     @JsonProperty("artists")
     private ArtistResponse artists;
 
-    public ArtistResponse getArtists() {
-        return artists;
-    }
-
-    public void setArtists(ArtistResponse artists) {
-        this.artists = artists;
-    }
+    public ArtistResponse getArtists() { return artists; }
+    public void setArtists(ArtistResponse artists) { this.artists = artists; }
 
     public static class ArtistResponse {
 
         @JsonProperty("items")
         private List<Artist> items;
 
-        public List<Artist> getItems() {
-            return items;
-        }
-
-        public void setItems(List<Artist> items) {
-            this.items = items;
-        }
+        public List<Artist> getItems() { return items; }
+        public void setItems(List<Artist> items) { this.items = items; }
     }
 
     public static class Artist {
@@ -41,40 +31,47 @@ public class SpotifyApi {
         @JsonProperty("popularity")
         private int popularity;
 
-        @JsonProperty("genres") // <-- This tells Jackson to map the "genres" field from JSON
+        @JsonProperty("genres")
         private List<String> genres;
 
-        public String getId() {
-            return id;
-        }
+        @JsonProperty("images")
+        private List<Image> images;
 
-        public void setId(String id) {
-            this.id = id;
-        }
+        public String getId() { return id; }
+        public void setId(String id) { this.id = id; }
 
-        public String getName() {
-            return name;
-        }
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
 
-        public void setName(String name) {
-            this.name = name;
-        }
+        public int getPopularity() { return popularity; }
+        public void setPopularity(int popularity) { this.popularity = popularity; }
 
-        public int getPopularity() {
-            return popularity;
-        }
+        public List<String> getGenres() { return genres; }
+        public void setGenres(List<String> genres) { this.genres = genres; }
 
-        public void setPopularity(int popularity) {
-            this.popularity = popularity;
-        }
+        public List<Image> getImages() { return images; }
+        public void setImages(List<Image> images) { this.images = images; }
+    }
 
-        public List<String> getGenres() {
-            return genres;
-        }
+    public static class Image {
 
-        public void setGenres(List<String> genres) {
-            this.genres = genres;
-        }
+        @JsonProperty("url")
+        private String url;
+
+        @JsonProperty("height")
+        private Integer height;
+
+        @JsonProperty("width")
+        private Integer width;
+
+        public String getUrl() { return url; }
+        public void setUrl(String url) { this.url = url; }
+
+        public Integer getHeight() { return height; }
+        public void setHeight(Integer height) { this.height = height; }
+
+        public Integer getWidth() { return width; }
+        public void setWidth(Integer width) { this.width = width; }
     }
 
 }
