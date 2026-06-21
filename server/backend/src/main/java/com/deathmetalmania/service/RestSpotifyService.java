@@ -7,7 +7,10 @@ import com.deathmetalmania.exception.ServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,71 @@ public class RestSpotifyService implements SpotifyService {
     // Helper method to get current token dynamically
     private String getAccessToken() {
         return spotifyTokenService.getAccessToken();
+    }
+
+    @Override
+    public SpotifyApi searchBySubgenre(String genreKeyword, String[] allowTerms, String[] blockTerms) {
+        String url = "https://api.spotify.com/v1/search";
+        RestClient restClient = RestClient.builder().baseUrl(url).build();
+
+        List<SpotifyApi.Artist> allArtists = new ArrayList<>();
+        int limit = 50;
+        int maxPages = 10;
+
+        String encodedQuery;
+        try {
+            String raw = "genre:\"" + genreKeyword + "\"";
+            String once = URLEncoder.encode(raw, StandardCharsets.UTF_8).replace("+", "%20");
+            encodedQuery = URLEncoder.encode(once, StandardCharsets.UTF_8).replace("+", "%20");
+        } catch (Exception e) {
+            throw new ServiceException("Failed to encode genre query");
+        }
+
+        final String finalQuery = encodedQuery;
+        for (int page = 0; page < maxPages; page++) {
+            int offset = page * limit;
+            SpotifyApi partialResults = restClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .queryParam("q", finalQuery)
+                            .queryParam("type", "artist")
+                            .queryParam("limit", String.valueOf(limit))
+                            .queryParam("offset", String.valueOf(offset))
+                            .build())
+                    .header("Authorization", "Bearer " + getAccessToken())
+                    .retrieve()
+                    .body(SpotifyApi.class);
+
+            if (partialResults == null || partialResults.getArtists() == null || partialResults.getArtists().getItems() == null) break;
+            allArtists.addAll(partialResults.getArtists().getItems());
+            if (partialResults.getArtists().getItems().size() < limit) break;
+        }
+
+        if (allArtists.isEmpty()) {
+            throw new ServiceException("No artists found for genre: " + genreKeyword);
+        }
+
+        List<String> allowed = Arrays.asList(allowTerms);
+        List<String> blocked = Arrays.asList(blockTerms);
+
+        List<SpotifyApi.Artist> filtered = allArtists.stream()
+                .filter(artist -> {
+                    if (artist.getGenres() == null || artist.getGenres().isEmpty()) return false;
+                    List<String> genres = artist.getGenres().stream().map(String::toLowerCase).collect(Collectors.toList());
+                    boolean hasBlock = genres.stream().anyMatch(g -> blocked.stream().anyMatch(g::contains));
+                    if (hasBlock) return false;
+                    return genres.stream().anyMatch(g -> allowed.stream().anyMatch(g::contains));
+                })
+                .collect(Collectors.toList());
+
+        if (filtered.isEmpty()) {
+            throw new ServiceException("No matching artists found after filtering for: " + genreKeyword);
+        }
+
+        SpotifyApi.ArtistResponse response = new SpotifyApi.ArtistResponse();
+        response.setItems(filtered);
+        SpotifyApi result = new SpotifyApi();
+        result.setArtists(response);
+        return result;
     }
 
     @Override

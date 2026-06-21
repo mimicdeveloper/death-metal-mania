@@ -12,6 +12,7 @@ import UpdateProfileView from '../views/UpdateProfileView.vue'
 import FavoritesView from '../views/FavoritesView.vue'
 import AdminView from '../views/AdminView.vue'
 import EventsView from '../views/EventsView.vue'
+import SecretLairView from '../views/SecretLairView.vue'
 
 const routes = [
   {
@@ -51,7 +52,7 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/profile', 
+    path: '/profile',
     name: 'profile',
     component: ProfileView,
     meta: { requiresAuth: true }
@@ -66,7 +67,7 @@ const routes = [
     path: '/favorites',
     name: 'favorites',
     component: FavoritesView,
-    meta: { requiresAuth: true } 
+    meta: { requiresAuth: true }
   },
   {
     path: '/admin',
@@ -79,11 +80,17 @@ const routes = [
     name: 'events',
     component: EventsView,
     meta: { requiresAuth: true }
-  }  
+  },
+  {
+    path: '/secret-lair',
+    name: 'secret-lair',
+    component: SecretLairView,
+    meta: { requiresAuth: false }
+  }
 ]
 
 const router = createRouter({
-  history: createWebHistory('/death-metal-mania/'), // 👈 Required for GitHub Pages deployment
+  history: createWebHistory('/death-metal-mania/'),
   routes
 })
 

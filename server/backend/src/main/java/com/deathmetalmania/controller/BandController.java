@@ -63,6 +63,22 @@ public class BandController {
 
     }
 
+    @RequestMapping(path = "/searchBySubgenre", method = RequestMethod.GET)
+    public SpotifyApi searchBySubgenre(
+            @RequestParam String genre,
+            @RequestParam(defaultValue = "") String allow,
+            @RequestParam(defaultValue = "") String block) {
+        try {
+            String[] allowTerms = allow.isEmpty() ? new String[]{genre} : allow.split(",");
+            String[] blockTerms = block.isEmpty() ? new String[]{} : block.split(",");
+            SpotifyApi result = spotifyService.searchBySubgenre(genre, allowTerms, blockTerms);
+            if (result == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No bands found");
+            return result;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error: " + e.getMessage());
+        }
+    }
+
     //Search by band name
     @RequestMapping(path = "/searchByBandName", method = RequestMethod.GET)
     public SpotifyApi searchByBandName(@RequestParam String bandName) {
