@@ -73,13 +73,14 @@
             <loading-spinner :spin="true" />
           </div>
           <div v-else-if="bandAlbums[band.id] && bandAlbums[band.id].length > 0">
-            <h4 class="albums-title">Albums</h4>
+            <h4 class="albums-title">Albums — tap to preview</h4>
+
             <div class="albums-grid">
               <div
                 v-for="album in bandAlbums[band.id]"
                 :key="album.id"
                 class="album-tile"
-                :class="{ playing: expandedAlbumId === album.id }"
+                :class="{ selected: expandedAlbumId === album.id }"
                 @click="toggleAlbum(album.id)"
               >
                 <div class="album-cover-wrap">
@@ -94,20 +95,37 @@
                 </div>
                 <p class="album-name">{{ album.name }}</p>
                 <p class="album-year" v-if="album.release_date">{{ album.release_date.substring(0, 4) }}</p>
+              </div>
+            </div>
 
-                <!-- Spotify player for this album -->
-                <div v-if="expandedAlbumId === album.id" class="album-player" @click.stop>
+            <!-- Player panel — full width below the grid -->
+            <div v-if="expandedAlbumId" class="player-panel" @click.stop>
+              <template v-for="album in bandAlbums[band.id]" :key="album.id">
+                <div v-if="album.id === expandedAlbumId" class="player-inner">
+                  <div class="player-info">
+                    <img
+                      v-if="album.images && album.images.length > 0"
+                      :src="album.images[0].url"
+                      :alt="album.name"
+                      class="player-thumb"
+                    />
+                    <div>
+                      <p class="player-album-name">{{ album.name }}</p>
+                      <p class="player-year" v-if="album.release_date">{{ album.release_date.substring(0, 4) }}</p>
+                    </div>
+                    <button class="player-close" @click="expandedAlbumId = null">✕</button>
+                  </div>
                   <iframe
                     :src="`https://open.spotify.com/embed/album/${album.id}?theme=0`"
                     width="100%"
-                    height="380"
+                    height="352"
                     frameborder="0"
                     allowtransparency="true"
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                     class="spotify-iframe"
                   ></iframe>
                 </div>
-              </div>
+              </template>
             </div>
           </div>
           <div v-else class="no-albums">No albums found.</div>
@@ -505,33 +523,21 @@ input::placeholder { color: #555; }
   cursor: pointer;
   border-radius: 8px;
   overflow: hidden;
-  transition: transform 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
-.album-tile:hover { transform: scale(1.03); }
-.album-tile.playing { grid-column: 1 / -1; }
+.album-tile:hover { transform: scale(1.04); }
+
+.album-tile.selected {
+  outline: 2px solid crimson;
+  outline-offset: 2px;
+}
 
 .album-cover-wrap {
   position: relative;
   aspect-ratio: 1;
   border-radius: 6px;
   overflow: hidden;
-}
-
-.album-tile.playing .album-cover-wrap {
-  aspect-ratio: unset;
-  height: 110px;
-  width: 110px;
-  flex-shrink: 0;
-}
-
-.album-tile.playing {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 0.75rem;
-  background: #161616;
-  border-radius: 8px;
 }
 
 .album-cover {
@@ -554,57 +560,97 @@ input::placeholder { color: #555; }
 .album-play-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   color: #fff;
   opacity: 0;
   transition: opacity 0.15s;
 }
 
 .album-cover-wrap:hover .album-play-overlay,
-.album-tile.playing .album-play-overlay {
-  opacity: 1;
-}
+.album-tile.selected .album-play-overlay { opacity: 1; }
 
 .album-name {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: #ddd;
-  margin: 0.35rem 0 0;
+  color: #ccc;
+  margin: 0.3rem 0 0;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.album-tile.playing .album-name {
-  text-align: left;
-  font-size: 0.9rem;
-  white-space: normal;
-  color: #fff;
-}
-
 .album-year {
-  font-size: 0.68rem;
-  color: #666;
-  margin: 0.15rem 0 0;
+  font-size: 0.65rem;
+  color: #555;
+  margin: 0.1rem 0 0;
   text-align: center;
 }
 
-.album-tile.playing .album-year { text-align: left; }
-
-.album-player {
-  flex: 1;
-  min-width: 0;
+/* Full-width player panel */
+.player-panel {
+  margin-top: 1rem;
+  background: #0d0d0d;
+  border-radius: 10px;
+  overflow: hidden;
 }
+
+.player-inner {
+  display: flex;
+  flex-direction: column;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.player-thumb {
+  width: 42px;
+  height: 42px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.player-album-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  flex: 1;
+}
+
+.player-year {
+  font-size: 0.72rem;
+  color: #666;
+  margin: 0.15rem 0 0;
+}
+
+.player-close {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.player-close:hover { color: crimson; }
 
 .spotify-iframe {
   display: block;
   border: none;
-  border-radius: 8px;
   width: 100%;
 }
 
