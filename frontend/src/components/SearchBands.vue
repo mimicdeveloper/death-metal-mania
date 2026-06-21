@@ -156,6 +156,7 @@ const SUBGENRE_BUTTONS = [
   { key: 'swedish',       label: 'Swedish Death Metal',   genre: 'swedish death metal', allow: 'swedish death', block: '' },
   { key: 'death-roll',    label: 'Death & Roll',          genre: 'death and roll',    allow: 'death and roll,death metal', block: '' },
   { key: 'technical',     label: 'Technical Death Metal', genre: 'technical death metal', allow: 'technical death,death metal', block: 'deathcore' },
+  { key: 'hardcore-death',label: 'Hardcore Death Metal',  genre: 'hardcore death metal',  allow: 'hardcore death,death metal', block: 'deathcore,metalcore' },
 ];
 
 const PAGE_SIZE = 24;
@@ -304,6 +305,7 @@ export default {
         { label: 'Finnish Death Metal',   match: 'finnish death' },
         { label: 'Old School Death Metal',match: 'old school death' },
         { label: 'Technical Death Metal', match: 'technical death' },
+        { label: 'Hardcore Death Metal',  match: 'hardcore death' },
       ];
       this.allGenres = approved.filter(g =>
         this.genreResults.some(band =>
