@@ -7,7 +7,35 @@
       <p class="lair-warning">You weren't supposed to find this.</p>
     </div>
 
-    <!-- Genre buttons -->
+    <!-- Extreme genre playlist links -->
+    <div class="playlist-block">
+      <h2 class="lair-section-title">
+        <span class="title-line"></span>
+        Browse Extreme Playlists
+        <span class="title-line"></span>
+      </h2>
+      <div class="playlist-scroll">
+        <a
+          v-for="p in playlists"
+          :key="p.label"
+          :href="p.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="playlist-card"
+          :style="{ '--accent': p.color }"
+        >
+          <span class="playlist-icon">{{ p.icon }}</span>
+          <span class="playlist-label">{{ p.label }}</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Band loader buttons -->
+    <h2 class="lair-section-title solo">
+      <span class="title-line"></span>
+      Load Bands
+      <span class="title-line"></span>
+    </h2>
     <div class="genre-buttons">
       <button
         v-for="g in genreButtons"
@@ -144,6 +172,31 @@ import api from '@/api';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { useToast } from 'vue-toastification';
 
+const LAIR_PLAYLISTS = [
+  { label: 'Goregrind',          icon: '🧠', color: '#3a0000', url: 'https://open.spotify.com/search/goregrind/playlists' },
+  { label: 'Grindcore',          icon: '💥', color: '#2a0a00', url: 'https://open.spotify.com/search/grindcore/playlists' },
+  { label: 'Crust Punk',         icon: '🏴', color: '#111',    url: 'https://open.spotify.com/search/crust%20punk/playlists' },
+  { label: 'D-Beat',             icon: '🥁', color: '#1a1a00', url: 'https://open.spotify.com/search/d-beat/playlists' },
+  { label: 'Powerviolence',      icon: '⚡', color: '#2a1a00', url: 'https://open.spotify.com/search/powerviolence/playlists' },
+  { label: 'Noisecore',          icon: '📻', color: '#0a0a1a', url: 'https://open.spotify.com/search/noisecore/playlists' },
+  { label: 'Harsh Noise',        icon: '🔊', color: '#1a0a0a', url: 'https://open.spotify.com/search/harsh%20noise%20wall/playlists' },
+  { label: 'Noise Rock',         icon: '🎸', color: '#1a1500', url: 'https://open.spotify.com/search/noise%20rock/playlists' },
+  { label: 'Blackened Crust',    icon: '⚫', color: '#0a0a2a', url: 'https://open.spotify.com/search/blackened%20crust/playlists' },
+  { label: 'War Metal',          icon: '💣', color: '#2a1a00', url: 'https://open.spotify.com/search/war%20metal/playlists' },
+  { label: 'Bestial Black Metal', icon: '🐐', color: '#0a1a0a', url: 'https://open.spotify.com/search/bestial%20black%20metal/playlists' },
+  { label: 'Sludge Metal',       icon: '🐌', color: '#1a2a00', url: 'https://open.spotify.com/search/sludge%20metal/playlists' },
+  { label: 'Drone Doom',         icon: '🌑', color: '#0a0a0a', url: 'https://open.spotify.com/search/drone%20doom/playlists' },
+  { label: 'Funeral Doom',       icon: '⚰️', color: '#1a0a2a', url: 'https://open.spotify.com/search/funeral%20doom/playlists' },
+  { label: 'Death-Doom',         icon: '🕯️', color: '#1a0a1a', url: 'https://open.spotify.com/search/death%20doom%20metal/playlists' },
+  { label: 'Mathgrind',          icon: '🔢', color: '#001a1a', url: 'https://open.spotify.com/search/mathgrind/playlists' },
+  { label: 'Pornogrind',         icon: '🩻', color: '#2a0010', url: 'https://open.spotify.com/search/pornogrind/playlists' },
+  { label: 'Hardcore Punk',      icon: '✊', color: '#1a0a00', url: 'https://open.spotify.com/search/hardcore%20punk/playlists' },
+  { label: 'Anarcho Punk',       icon: '🅐',  color: '#0a1a00', url: 'https://open.spotify.com/search/anarcho%20punk/playlists' },
+  { label: 'Black Metal',        icon: '🌑', color: '#0d0d1a', url: 'https://open.spotify.com/search/black%20metal/playlists' },
+  { label: 'Stoner Doom',        icon: '🌿', color: '#1a2a0a', url: 'https://open.spotify.com/search/stoner%20doom/playlists' },
+  { label: 'Thrash Metal',       icon: '⚡', color: '#2a2a00', url: 'https://open.spotify.com/search/thrash%20metal/playlists' },
+];
+
 const LAIR_GENRES = [
   { key: 'goregrind', label: 'Goregrind',   genre: 'goregrind',  allow: 'goregrind,gore,grindcore', block: '' },
   { key: 'crust',     label: 'Crust Punk',  genre: 'crust punk', allow: 'crust,d-beat,discharge',   block: '' },
@@ -162,6 +215,7 @@ export default {
   data() {
     return {
       genreButtons: LAIR_GENRES,
+      playlists: LAIR_PLAYLISTS,
       activeButton: null,
       isLoading: false,
       searched: false,
@@ -454,6 +508,82 @@ export default {
 .escape-link { text-align: center; margin-top: 3rem; }
 .escape { color: #333; font-size: 0.8rem; text-decoration: none; text-transform: uppercase; letter-spacing: 0.08em; transition: color 0.15s; }
 .escape:hover { color: crimson; }
+
+/* Playlist section */
+.playlist-block { margin-bottom: 2.5rem; }
+
+.lair-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #3a0010;
+  margin: 0 0 1rem;
+}
+
+.lair-section-title.solo { margin: 1.5rem 0 1rem; }
+
+.title-line { flex: 1; height: 1px; background: #111; }
+
+.playlist-scroll {
+  display: flex;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding-bottom: 0.65rem;
+  scrollbar-width: thin;
+  scrollbar-color: #111 transparent;
+}
+
+.playlist-scroll::-webkit-scrollbar { height: 3px; }
+.playlist-scroll::-webkit-scrollbar-thumb { background: #111; border-radius: 2px; }
+
+.playlist-card {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.9rem 0.85rem;
+  min-width: 110px;
+  border-radius: 8px;
+  background: #0a0a0a;
+  border: 1px solid #111;
+  border-bottom: 2px solid var(--accent, #1a0008);
+  text-decoration: none;
+  transition: transform 0.15s, border-color 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.playlist-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 120%, var(--accent, crimson) 0%, transparent 70%);
+  opacity: 0.06;
+  transition: opacity 0.2s;
+}
+
+.playlist-card:hover { transform: translateY(-2px); }
+.playlist-card:hover::before { opacity: 0.15; }
+
+.playlist-icon { font-size: 1.5rem; line-height: 1; }
+
+.playlist-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #555;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  transition: color 0.15s;
+}
+
+.playlist-card:hover .playlist-label { color: #aaa; }
 
 @media (max-width: 600px) {
   .band-grid { grid-template-columns: 1fr; }
