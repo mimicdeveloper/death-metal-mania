@@ -87,19 +87,25 @@ public class RestSpotifyService implements SpotifyService {
             throw new ServiceException("No artists found using fallback query.");
         }
 
-        // Allowlist: keep ONLY bands whose Spotify genre tags include death metal or slam.
+        // Allowlist: keep only bands with approved death metal subgenres.
         List<SpotifyApi.Artist> filteredArtists = allArtists.stream()
                 .filter(artist -> {
                     if (artist.getGenres() == null || artist.getGenres().isEmpty()) {
                         return false;
                     }
-                    return artist.getGenres().stream().anyMatch(
-                            genre -> {
-                                String lowerGenre = genre.toLowerCase();
-                                return lowerGenre.contains("death metal") ||
-                                        lowerGenre.contains("slam");
-                            }
-                    );
+                    return artist.getGenres().stream().anyMatch(genre -> {
+                        String g = genre.toLowerCase();
+                        return g.contains("death metal") ||
+                               g.contains("slam") ||
+                               g.contains("brutal") ||
+                               g.contains("death doom") ||
+                               g.contains("cavernous") ||
+                               g.contains("blackened death") ||
+                               g.contains("death and roll") ||
+                               g.contains("swedish death") ||
+                               g.contains("finnish death") ||
+                               g.contains("old school death");
+                    });
                 })
                 .collect(Collectors.toList());
 

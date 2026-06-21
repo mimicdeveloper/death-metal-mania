@@ -39,5 +39,9 @@ export default {
 .load-spinner {
   transition-property: opacity;
   transition-duration: 400ms;
+  font-size: 3rem;
+  color: crimson;
+  display: block;
+  margin: 2rem auto;
 }
 </style>

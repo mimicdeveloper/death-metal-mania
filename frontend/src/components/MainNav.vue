@@ -62,7 +62,7 @@
   
   <style scoped>
   nav {
-    background-color: #000000;
+    background-color: #0a0a0a;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -70,23 +70,23 @@
     padding: 1rem;
     gap: 1rem;
   }
-  
-  nav button {
-  background-color: #333;
-  border: none;
-  padding: 1rem 2rem;           
-  color: white;
-  cursor: pointer;
-  font-size: 1.1rem;
-  font-weight: 600;            
-  border-radius: 8px;           
-  transition: background-color 0.3s ease;
-  min-width: 120px;             
-}
 
-  
+  nav button {
+    background-color: #333;
+    border: none;
+    padding: 1rem 2rem;
+    color: crimson;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-width: 120px;
+  }
+
   nav button:hover {
     background-color: crimson;
+    color: white;
   }
   </style>
   
