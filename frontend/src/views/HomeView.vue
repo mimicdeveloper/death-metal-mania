@@ -1,24 +1,26 @@
 <template>
   <div class="home-container">
-
     <main>
+      <DiscoverSection />
+      <hr class="section-divider" />
       <SearchBands />
       <hr class="section-divider" />
       <SearchEvents />
     </main>
-
   </div>
 </template>
 
 <script>
 import SearchBands from '../components/SearchBands.vue';
 import SearchEvents from '../components/SearchEvents.vue';
+import DiscoverSection from '../components/DiscoverSection.vue';
 
 export default {
   name: 'HomeView',
   components: {
     SearchBands,
     SearchEvents,
+    DiscoverSection,
   }
 };
 </script>
@@ -44,8 +46,8 @@ main {
 }
 
 .section-divider {
-  margin: 2rem 0;
+  margin: 0;
   border: none;
-  border-top: 2px solid #444;
+  border-top: 1px solid #1e1e1e;
 }
 </style>
