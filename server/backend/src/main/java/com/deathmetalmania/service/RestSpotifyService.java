@@ -104,7 +104,7 @@ public class RestSpotifyService implements SpotifyService {
                             g.contains("death metal") ||
                             g.contains("slam") ||
                             g.contains("brutal death") ||
-                            g.contains("death doom") ||
+                            g.contains("hardcore death") ||
                             g.contains("cavernous") ||
                             g.contains("blackened death") ||
                             g.contains("death and roll") ||

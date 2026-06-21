@@ -1,12 +1,10 @@
 <template>
-  <div class="home-container">
-    <main>
-      <DiscoverSection />
-      <hr class="section-divider" />
-      <SearchBands />
-      <hr class="section-divider" />
-      <SearchEvents />
-    </main>
+  <div class="home-view">
+    <DiscoverSection />
+    <div class="section-divider"></div>
+    <SearchBands />
+    <div class="section-divider"></div>
+    <SearchEvents />
   </div>
 </template>
 
@@ -17,37 +15,20 @@ import DiscoverSection from '../components/DiscoverSection.vue';
 
 export default {
   name: 'HomeView',
-  components: {
-    SearchBands,
-    SearchEvents,
-    DiscoverSection,
-  }
+  components: { SearchBands, SearchEvents, DiscoverSection }
 };
 </script>
 
 <style scoped>
-.home-container {
-  background-color: #0a0a0a;
-  color: #ffffff;
-  min-height: 100vh;
-  font-family: 'Arial', sans-serif;
-  font-size: 18px;
-}
-
-main {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
+.home-view {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .section-divider {
-  margin: 0;
-  border: none;
-  border-top: 1px solid #1e1e1e;
+  height: 1px;
+  background: #1a1a1a;
+  margin: 2rem 0;
 }
 </style>

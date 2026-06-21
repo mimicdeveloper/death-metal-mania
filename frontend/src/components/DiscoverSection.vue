@@ -165,10 +165,10 @@ export default {
           url: 'https://open.spotify.com/search/blackened%20death%20metal/playlists',
         },
         {
-          label: 'Death Doom Metal',
-          icon: '⚰️',
-          color: '#3d1a1a',
-          url: 'https://open.spotify.com/search/death%20doom%20metal/playlists',
+          label: 'Hardcore Death Metal',
+          icon: '🔨',
+          color: '#8b0000',
+          url: 'https://open.spotify.com/search/hardcore%20death%20metal/playlists',
         },
         {
           label: 'Death Thrash',
