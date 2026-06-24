@@ -21,7 +21,7 @@ public class GroqAiService implements AiService {
     @Override
     public String chat(String systemPrompt, List<Map<String, String>> userMessages) {
         if (apiKey == null || apiKey.isBlank()) {
-            return "The Oracle is offline — GROQ_API_KEY not configured.";
+            return "GROQ_API_KEY not set — add it as an environment variable in Koyeb to activate the Oracle.";
         }
 
         List<Message> messages = new ArrayList<>();
@@ -48,13 +48,13 @@ public class GroqAiService implements AiService {
         return response.getChoices().get(0).getMessage().getContent();
     }
 
-    // --- Request models ---
+    // --- Request models (annotations on getters so Jackson serializes them correctly) ---
 
     static class GroqRequest {
-        @JsonProperty("model") private String model;
-        @JsonProperty("messages") private List<Message> messages;
-        @JsonProperty("max_tokens") private int maxTokens;
-        @JsonProperty("temperature") private double temperature;
+        private final String model;
+        private final List<Message> messages;
+        private final int maxTokens;
+        private final double temperature;
 
         GroqRequest(String model, List<Message> messages, int maxTokens, double temperature) {
             this.model = model;
@@ -63,41 +63,57 @@ public class GroqAiService implements AiService {
             this.temperature = temperature;
         }
 
+        @JsonProperty("model")
         public String getModel() { return model; }
+
+        @JsonProperty("messages")
         public List<Message> getMessages() { return messages; }
+
+        @JsonProperty("max_tokens")
         public int getMaxTokens() { return maxTokens; }
+
+        @JsonProperty("temperature")
         public double getTemperature() { return temperature; }
     }
 
     static class Message {
-        @JsonProperty("role") private String role;
-        @JsonProperty("content") private String content;
+        private final String role;
+        private final String content;
 
         Message(String role, String content) {
             this.role = role;
             this.content = content;
         }
 
+        @JsonProperty("role")
         public String getRole() { return role; }
+
+        @JsonProperty("content")
         public String getContent() { return content; }
     }
 
     // --- Response models ---
 
     static class GroqResponse {
-        @JsonProperty("choices") private List<Choice> choices;
+        private List<Choice> choices;
+
+        @JsonProperty("choices")
         public List<Choice> getChoices() { return choices; }
         public void setChoices(List<Choice> choices) { this.choices = choices; }
     }
 
     static class Choice {
-        @JsonProperty("message") private ChoiceMessage message;
+        private ChoiceMessage message;
+
+        @JsonProperty("message")
         public ChoiceMessage getMessage() { return message; }
         public void setMessage(ChoiceMessage message) { this.message = message; }
     }
 
     static class ChoiceMessage {
-        @JsonProperty("content") private String content;
+        private String content;
+
+        @JsonProperty("content")
         public String getContent() { return content; }
         public void setContent(String content) { this.content = content; }
     }

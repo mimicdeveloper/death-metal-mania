@@ -165,8 +165,13 @@ export default {
       try {
         const res = await api.post('/ai/recommend', { description });
         this.recommendResult = res.data.response;
-      } catch {
-        this.toast.error('Recommender failed. Check backend connection.');
+        if (res.data.response?.includes('GROQ_API_KEY')) {
+          this.toast.warning('Groq API key not set on Koyeb — see setup instructions');
+        }
+      } catch (err) {
+        const msg = err?.response?.data?.message || '';
+        this.recommendResult = msg || 'Backend unreachable. Check that Koyeb is running.';
+        this.toast.error('Recommender failed — backend error');
       } finally {
         this.isThinking = false;
       }
