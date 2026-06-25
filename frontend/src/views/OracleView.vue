@@ -85,7 +85,28 @@
 
       <div v-if="recommendResult" class="recommend-result">
         <div v-html="formatRecommendations(recommendResult)" class="reco-content"></div>
-        <button class="clear-btn-sm" @click="recommendResult = ''; recommendInput = ''">New search</button>
+
+        <div v-if="loadingBands" class="bands-loading">
+          <loading-spinner :spin="true" />
+          <span>Summoning the bands from the void...</span>
+        </div>
+
+        <div v-if="recommendedBands.length > 0" class="reco-bands">
+          <h4 class="reco-bands-title">▶ Listen — tap a band for albums &amp; song previews</h4>
+          <div class="reco-band-grid">
+            <band-card
+              v-for="entry in recommendedBands"
+              :key="entry.band.id"
+              :band="entry.band"
+              :description="entry.description"
+            />
+          </div>
+        </div>
+        <p v-else-if="!loadingBands && bandsFetched" class="reco-bands-none">
+          Couldn't find these on Spotify to preview — the recommendations above still stand.
+        </p>
+
+        <button class="clear-btn-sm" @click="resetRecommend">New search</button>
       </div>
     </div>
 
@@ -95,9 +116,12 @@
 <script>
 import api from '@/api';
 import { useToast } from 'vue-toastification';
+import BandCard from '@/components/BandCard.vue';
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
 
 export default {
   name: 'OracleView',
+  components: { BandCard, LoadingSpinner },
   setup() {
     return { toast: useToast() };
   },
@@ -109,6 +133,9 @@ export default {
       isThinking: false,
       recommendInput: '',
       recommendResult: '',
+      recommendedBands: [],
+      loadingBands: false,
+      bandsFetched: false,
       starterQuestions: [
         'What are the most brutal slam albums of all time?',
         'Explain the difference between goregrind and death metal',
@@ -161,13 +188,17 @@ export default {
 
       this.isThinking = true;
       this.recommendResult = '';
+      this.recommendedBands = [];
+      this.bandsFetched = false;
 
       try {
         const res = await api.post('/ai/recommend', { description });
         this.recommendResult = res.data.response;
         if (res.data.response?.includes('GROQ_API_KEY')) {
           this.toast.warning('Groq API key not set on Koyeb — see setup instructions');
+          return;
         }
+        await this.fetchRecommendedBands(res.data.response);
       } catch (err) {
         const msg = err?.response?.data?.message || '';
         this.recommendResult = msg || 'Backend unreachable. Check that Koyeb is running.';
@@ -175,6 +206,64 @@ export default {
       } finally {
         this.isThinking = false;
       }
+    },
+
+    parseRecommendations(text) {
+      const out = [];
+      for (const line of text.split('\n')) {
+        const match = line.match(/^\s*\d*\.?\s*\*\*(.+?)\*\*(.*)$/);
+        if (match) {
+          out.push({
+            name: match[1].trim(),
+            description: match[2].replace(/^[\s—–:()-]+/, '').replace(/\*\*/g, '').trim(),
+          });
+        }
+      }
+      return out;
+    },
+
+    async fetchRecommendedBands(text) {
+      const parsed = this.parseRecommendations(text);
+      if (parsed.length === 0) return;
+
+      this.loadingBands = true;
+      try {
+        const results = await Promise.all(
+          parsed.map(async (item) => {
+            try {
+              const res = await api.get(`/bands/searchByBandName?bandName=${encodeURIComponent(item.name)}`);
+              const items = res.data.artists?.items || [];
+              const band = this.bestMatch(items, item.name);
+              return band ? { band, description: item.description } : null;
+            } catch {
+              return null;
+            }
+          })
+        );
+        const seen = new Set();
+        this.recommendedBands = results.filter((r) => {
+          if (!r || seen.has(r.band.id)) return false;
+          seen.add(r.band.id);
+          return true;
+        });
+      } finally {
+        this.loadingBands = false;
+        this.bandsFetched = true;
+      }
+    },
+
+    bestMatch(items, name) {
+      if (items.length === 0) return null;
+      const target = name.toLowerCase();
+      const exact = items.find((b) => b.name.toLowerCase() === target);
+      return exact || items[0];
+    },
+
+    resetRecommend() {
+      this.recommendResult = '';
+      this.recommendInput = '';
+      this.recommendedBands = [];
+      this.bandsFetched = false;
     },
 
     clearChat() {
@@ -531,6 +620,45 @@ export default {
   color: #666;
   line-height: 1.6;
   margin: 0.5rem 0;
+}
+
+/* Recommended playable bands */
+.bands-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.5rem 0 0.5rem;
+  color: #555;
+  font-size: 0.82rem;
+}
+
+.reco-bands {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #161616;
+}
+
+.reco-bands-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: crimson;
+  margin: 0 0 0.85rem;
+}
+
+.reco-band-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.6rem;
+}
+
+.reco-bands-none {
+  margin-top: 1.25rem;
+  font-size: 0.8rem;
+  color: #444;
+  text-align: center;
 }
 
 @media (max-width: 600px) {
